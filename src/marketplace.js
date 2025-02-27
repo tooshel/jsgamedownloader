@@ -19,17 +19,27 @@ export class Marketplace {
     this.selectedIndex = 0;
     this.scrollOffset = 0;
     this.loading = true;
+    this.fontsLoaded = false;
     this.resourceLoader = createResourceLoader();
-    this.loadFont();
   }
 
-  async loadFont() {
-    await this.resourceLoader.addFont("Roboto", "fonts/Roboto-Regular.ttf");
+  async loadFonts() {
+    if (this.fontsLoaded) return;
+    
+    await Promise.all([
+      this.resourceLoader.addFont("Roboto", "fonts/Roboto-Regular.ttf"),
+      this.resourceLoader.addFont("NotoEmoji", "fonts/NotoEmoji-Regular.ttf")
+    ]);
+    
+    this.fontsLoaded = true;
   }
 
   async fetchItems(url) {
     this.loading = true;
     try {
+      // Make sure fonts are loaded first
+      await this.loadFonts();
+      
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch: ${response.status}`);
@@ -174,28 +184,26 @@ export class Marketplace {
 
     // Draw scroll indicators if needed
     if (this.scrollOffset > 0) {
+      // Draw up arrow indicator
+      ctx.font = "20px NotoEmoji";
       ctx.fillStyle = "white";
-      ctx.beginPath();
-      ctx.moveTo(width / 2 - 10, TITLE_HEIGHT + 10);
-      ctx.lineTo(width / 2 + 10, TITLE_HEIGHT + 10);
-      ctx.lineTo(width / 2, TITLE_HEIGHT + 20);
-      ctx.fill();
+      ctx.textAlign = "center";
+      ctx.fillText("↑", width / 2, TITLE_HEIGHT + 20);
     }
-
+    
     if (endIndex < this.items.length) {
+      // Draw down arrow indicator
+      ctx.font = "20px NotoEmoji";
       ctx.fillStyle = "white";
-      ctx.beginPath();
-      ctx.moveTo(width / 2 - 10, height - 20);
-      ctx.lineTo(width / 2 + 10, height - 20);
-      ctx.lineTo(width / 2, height - 10);
-      ctx.fill();
+      ctx.textAlign = "center";
+      ctx.fillText("↓", width / 2, height - 40);
     }
 
-    // Draw instructions
-    ctx.font = "14px Roboto";
+    // Draw instructions at the bottom of the screen
+    ctx.font = "14px Roboto, NotoEmoji";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("Use ↑/↓ to navigate", width / 2, height - 30);
+    ctx.fillText("Use ↑/↓ to navigate", width / 2, height - 10);
   }
 
   getSelectedItem() {

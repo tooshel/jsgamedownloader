@@ -52,16 +52,16 @@ function gameLoop() {
 async function launch() {
   // Create marketplace instance
   marketplace = new Marketplace(canvas);
-
+  
+  // Start game loop immediately to show loading screen
+  lastTime = performance.now();
+  gameLoop();
+  
   // Load sound effect
   laserSound = await loadSound("sounds/laser.mp3");
 
   // Fetch marketplace items from our sample data
   await marketplace.fetchItems("./sample-data.json");
-
-  // Start game loop
-  lastTime = performance.now();
-  gameLoop();
 }
 
 // Helper function to play sound (moved from utils import)
