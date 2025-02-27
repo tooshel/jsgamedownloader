@@ -22,6 +22,10 @@ export class Marketplace {
     this.fontsLoaded = false;
     this.resourceLoader = createResourceLoader();
     this.showConfirmation = false;
+    this.installing = false;
+    this.installProgress = 0;
+    this.installStatus = "";
+    this.installComplete = false;
   }
 
   async loadFonts() {
@@ -66,7 +70,16 @@ export class Marketplace {
   update(input) {
     if (this.loading) return;
 
-    if (this.showConfirmation) {
+    if (this.installing) {
+      // During installation, no input is processed
+      return;
+    } else if (this.installComplete) {
+      // After installation is complete, any button returns to the list
+      if (input.BUTTON_SOUTH.pressed || input.BUTTON_EAST.pressed) {
+        this.installComplete = false;
+        this.showConfirmation = false;
+      }
+    } else if (this.showConfirmation) {
       // Handle confirmation screen input
       if (input.BUTTON_SOUTH.pressed) {
         // Cancel and go back to list
@@ -129,16 +142,16 @@ export class Marketplace {
     ctx.fillStyle = "#1a1a2e";
     ctx.fillRect(0, 0, width, height);
 
+    // Draw header (consistent across all screens)
+    ctx.fillStyle = "#0f3460";
+    ctx.fillRect(0, 0, width, TITLE_HEIGHT);
+
+    ctx.font = "24px Roboto";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Game Marketplace", width / 2, TITLE_HEIGHT / 2 + 8);
+
     if (this.loading) {
-      // Draw header
-      ctx.fillStyle = "#0f3460";
-      ctx.fillRect(0, 0, width, TITLE_HEIGHT);
-
-      ctx.font = "24px Roboto";
-      ctx.fillStyle = "white";
-      ctx.textAlign = "center";
-      ctx.fillText("Game Marketplace", width / 2, TITLE_HEIGHT / 2 + 8);
-
       drawLoadingScreen(
         ctx,
         this.resourceLoader.getPercentComplete(),
@@ -148,19 +161,22 @@ export class Marketplace {
       return;
     }
 
+    if (this.installing) {
+      this.drawInstallationScreen();
+      return;
+    }
+
+    if (this.installComplete) {
+      this.drawInstallCompleteScreen();
+      return;
+    }
+
     if (this.showConfirmation) {
       this.drawConfirmationScreen();
       return;
     }
 
-    // Draw header
-    ctx.fillStyle = "#0f3460";
-    ctx.fillRect(0, 0, width, TITLE_HEIGHT);
-
-    ctx.font = "24px Roboto";
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-    ctx.fillText("Game Marketplace", width / 2, TITLE_HEIGHT / 2 + 8);
+    // Header is now drawn at the beginning of the draw method
 
     if (this.items.length === 0) {
       ctx.font = "20px Roboto";
@@ -244,14 +260,7 @@ export class Marketplace {
     const item = this.getSelectedItem();
     if (!item) return;
 
-    // Draw header
-    ctx.fillStyle = "#0f3460";
-    ctx.fillRect(0, 0, width, TITLE_HEIGHT);
-
-    ctx.font = "24px Roboto";
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-    ctx.fillText("Confirm Installation", width / 2, TITLE_HEIGHT / 2 + 8);
+    // Header is now drawn at the beginning of the draw method
 
     // Draw content area
     const contentY = TITLE_HEIGHT + 20;
@@ -353,36 +362,147 @@ export class Marketplace {
     );
   }
 
-  installSelectedGame() {
+  drawInstallationScreen() {
+    const { ctx, width, height } = this;
+    const item = this.getSelectedItem();
+    if (!item) return;
+
+    const contentY = TITLE_HEIGHT + 40;
+
+    // Draw item name
+    ctx.font = "bold 20px Roboto";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText(`Installing ${item.name}...`, width / 2, contentY);
+
+    // Draw progress bar
+    const barWidth = width * 0.7;
+    const barHeight = 30;
+    const barX = (width - barWidth) / 2;
+    const barY = contentY + 50;
+
+    // Draw progress bar background
+    ctx.fillStyle = "#16213e";
+    ctx.fillRect(barX, barY, barWidth, barHeight);
+
+    // Draw progress
+    ctx.fillStyle = "#e94560";
+    ctx.fillRect(barX, barY, barWidth * this.installProgress, barHeight);
+
+    // Draw progress percentage
+    ctx.font = "16px Roboto";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      `${Math.round(this.installProgress * 100)}%`,
+      width / 2,
+      barY + barHeight / 2 + 5
+    );
+
+    // Draw status message
+    ctx.font = "16px Roboto";
+    ctx.fillStyle = "#cccccc";
+    ctx.textAlign = "center";
+    ctx.fillText(this.installStatus, width / 2, barY + barHeight + 40);
+  }
+
+  drawInstallCompleteScreen() {
+    const { ctx, width, height } = this;
+    const item = this.getSelectedItem();
+    if (!item) return;
+
+    const contentY = TITLE_HEIGHT + 60;
+
+    // Draw success icon
+    ctx.font = "60px NotoEmoji";
+    ctx.fillStyle = "#4CAF50";
+    ctx.textAlign = "center";
+    ctx.fillText("✅", width / 2, contentY);
+
+    // Draw success message
+    ctx.font = "bold 24px Roboto";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Installation Complete!", width / 2, contentY + 80);
+
+    // Draw game name
+    ctx.font = "18px Roboto";
+    ctx.fillStyle = "#cccccc";
+    ctx.textAlign = "center";
+    ctx.fillText(`${item.name} has been installed successfully.`, width / 2, contentY + 120);
+
+    // Draw button prompt
+    const buttonY = height - 60;
+    ctx.fillStyle = "#16213e";
+    ctx.fillRect(width / 2 - 100, buttonY, 200, 40);
+    ctx.font = "16px Roboto, NotoEmoji";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Continue (🅰️ or 🅱️)", width / 2, buttonY + 25);
+  }
+
+  async installSelectedGame() {
     const item = this.getSelectedItem();
     if (!item) return;
 
     console.log(`Installing game from: ${item.url}`);
-
-    // TODO: Implement game installation logic
-    // 1. Extract game slug/name from URL or use sanitized name
-    // 2. Fetch repository content
-    // 3. Install to appropriate location
-    // 4. Show success/failure message
-
-    // Example implementation (placeholder):
-    /*
-    const gameSlug = item.name.toLowerCase().replace(/\s+/g, '-');
-    const tempDir = `./temp-${gameSlug}`;
     
-    // Clone repository
-    // git clone ${item.url} ${tempDir}
-    
-    // Install game
-    // mkdir -p ./games/${gameSlug}
-    // cp -r ${tempDir}/* ./games/${gameSlug}/
-    
-    // Clean up
-    // rm -rf ${tempDir}
-    */
+    this.installing = true;
+    this.installProgress = 0;
+    this.installStatus = "Preparing installation...";
 
-    // For now, just go back to the list
-    this.showConfirmation = false;
+    // Simulate installation process with artificial delays
+    try {
+      // Step 1: Preparing
+      await this.updateInstallProgress(0.1, "Preparing installation...", 800);
+      
+      // Step 2: Downloading repository
+      await this.updateInstallProgress(0.3, "Downloading repository...", 1500);
+      
+      // Step 3: Extracting files
+      await this.updateInstallProgress(0.5, "Extracting files...", 1000);
+      
+      // Step 4: Installing dependencies
+      await this.updateInstallProgress(0.7, "Installing dependencies...", 1200);
+      
+      // Step 5: Configuring game
+      await this.updateInstallProgress(0.9, "Configuring game...", 800);
+      
+      // Step 6: Finishing up
+      await this.updateInstallProgress(1.0, "Installation complete!", 500);
+
+      // TODO: Actual implementation would go here
+      // const gameSlug = item.name.toLowerCase().replace(/\s+/g, '-');
+      // const tempDir = `./temp-${gameSlug}`;
+      // 
+      // 1. Clone repository
+      // await execCommand(`git clone ${item.url} ${tempDir}`);
+      // 
+      // 2. Install game
+      // await execCommand(`mkdir -p ./games/${gameSlug}`);
+      // await execCommand(`cp -r ${tempDir}/* ./games/${gameSlug}/`);
+      // 
+      // 3. Clean up
+      // await execCommand(`rm -rf ${tempDir}`);
+
+      // Show completion screen
+      this.installing = false;
+      this.installComplete = true;
+    } catch (error) {
+      console.error("Installation failed:", error);
+      this.installStatus = "Installation failed: " + error.message;
+      // After a delay, go back to confirmation screen
+      setTimeout(() => {
+        this.installing = false;
+      }, 3000);
+    }
+  }
+
+  updateInstallProgress(progress, status, delay) {
+    this.installProgress = progress;
+    this.installStatus = status;
+    
+    return new Promise(resolve => setTimeout(resolve, delay));
   }
 
   getSelectedItem() {
