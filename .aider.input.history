@@ -1,0 +1,15 @@
+
+# 2025-02-27 13:53:00.157188
++n
+
+# 2025-02-27 13:53:11.960532
++Using src/main.js and src/utils.js make a new way to select items out of a json array of objects. The json array of items will come from a remote source and you should show "loading" while the fetch happens. Each item in that object will have a name, short description, optional link to an icon, and a url to a git repo for downloading a game. The list could get long so when you press the "down" button to scroll though the list when you get to the bottom is should handle that in a graceful way (by scrolling down?).  You will need to use "createResourceLoader" in src/utils.js to preload a font and any items in the array. The font you will use is in public/fonts/Roboto-Regular.ttf.  This is a canvas only app. Only draw to the canvas like you see in the example. No css and no dom!
+
+# 2025-02-27 13:54:46.622514
++yes
+
+# 2025-02-27 13:54:56.508802
++/run mkdir -p public\fonts
+
+# 2025-02-27 13:54:56.508802
++/run mkdir -p public\fonts
