@@ -20,18 +20,22 @@ function update(elapsedTime) {
   const [p1] = getInput();
 
   // Handle sound effect
-  if (p1.BUTTON_SOUTH.pressed && inputState.canPlaySound) {
-    playSound(laserSound);
-    inputState.canPlaySound = false;
-  } else if (!p1.BUTTON_SOUTH.pressed) {
-    inputState.canPlaySound = true;
-  }
+  // if (p1.BUTTON_SOUTH.pressed && inputState.canPlaySound) {
+  //   playSound(laserSound);
+  //   inputState.canPlaySound = false;
+  // } else if (!p1.BUTTON_SOUTH.pressed) {
+  //   inputState.canPlaySound = true;
+  // }
 
   // Add cooldown for input to prevent too rapid actions
   const now = performance.now();
   if (now - inputState.lastDpadPress > inputState.dpadCooldown) {
-    if (p1.DPAD_UP.pressed || p1.DPAD_DOWN.pressed || 
-        p1.BUTTON_EAST.pressed || p1.BUTTON_SOUTH.pressed) {
+    if (
+      p1.DPAD_UP.pressed ||
+      p1.DPAD_DOWN.pressed ||
+      p1.BUTTON_EAST.pressed ||
+      p1.BUTTON_SOUTH.pressed
+    ) {
       inputState.lastDpadPress = now;
       marketplace.update(p1);
     }
@@ -53,11 +57,11 @@ function gameLoop() {
 async function launch() {
   // Create marketplace instance
   marketplace = new Marketplace(canvas);
-  
+
   // Start game loop immediately to show loading screen
   lastTime = performance.now();
   gameLoop();
-  
+
   // Load sound effect
   laserSound = await loadSound("sounds/laser.mp3");
 

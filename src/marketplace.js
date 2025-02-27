@@ -106,7 +106,10 @@ export class Marketplace {
         }
 
         // If selected item is at the top of the page, scroll up one more
-        if (this.selectedIndex % ITEMS_PER_PAGE === 0 && this.selectedIndex > 0) {
+        if (
+          this.selectedIndex % ITEMS_PER_PAGE === 0 &&
+          this.selectedIndex > 0
+        ) {
           this.scrollOffset -= 1;
         }
 
@@ -135,7 +138,7 @@ export class Marketplace {
       ctx.fillStyle = "white";
       ctx.textAlign = "center";
       ctx.fillText("Game Marketplace", width / 2, TITLE_HEIGHT / 2 + 8);
-      
+
       drawLoadingScreen(
         ctx,
         this.resourceLoader.getPercentComplete(),
@@ -253,7 +256,7 @@ export class Marketplace {
     // Draw content area
     const contentY = TITLE_HEIGHT + 20;
     const contentHeight = height - contentY - 60; // Leave space for buttons
-    
+
     // Draw item icon if available
     if (item.icon && this.resourceLoader.images[item.name]) {
       const iconSize = 100;
@@ -278,73 +281,90 @@ export class Marketplace {
     ctx.font = "16px Roboto";
     ctx.fillStyle = "#cccccc";
     ctx.textAlign = "center";
-    
+
     // Word wrap description
     const description = item.description || "";
-    const words = description.split(' ');
+    const words = description.split(" ");
     const maxWidth = width - PADDING * 4;
-    let line = '';
+    let line = "";
     let lineY = descY;
-    
+
     for (let i = 0; i < words.length; i++) {
-      const testLine = line + words[i] + ' ';
+      const testLine = line + words[i] + " ";
       const metrics = ctx.measureText(testLine);
-      
+
       if (metrics.width > maxWidth && i > 0) {
         ctx.fillText(line, width / 2, lineY);
-        line = words[i] + ' ';
+        line = words[i] + " ";
         lineY += 25;
       } else {
         line = testLine;
       }
     }
     ctx.fillText(line, width / 2, lineY);
-    
+
     // Draw URL
     const urlY = lineY + 40;
     ctx.font = "14px Roboto";
     ctx.fillStyle = "#e94560";
     ctx.fillText(`Repository: ${item.url}`, width / 2, urlY);
-    
+
     // Draw warning
     const warningY = urlY + 30;
     ctx.fillStyle = "#ffcc00";
     ctx.font = "14px Roboto";
-    ctx.fillText("Warning: This will override any existing game with the same name.", width / 2, warningY);
-    
+    ctx.fillText(
+      "Warning: This will override any existing game with the same name.",
+      width / 2,
+      warningY
+    );
+
     // Draw buttons
     const buttonY = height - 50;
     const buttonWidth = 150;
     const buttonHeight = 40;
     const buttonPadding = 20;
-    
+
     // Cancel button
     ctx.fillStyle = "#16213e";
-    ctx.fillRect(width / 2 - buttonWidth - buttonPadding, buttonY, buttonWidth, buttonHeight);
-    ctx.font = "16px Roboto";
+    ctx.fillRect(
+      width / 2 - buttonWidth - buttonPadding,
+      buttonY,
+      buttonWidth,
+      buttonHeight
+    );
+    ctx.font = "16px Roboto, NotoEmoji";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("Cancel (🅰️)", width / 2 - buttonWidth / 2 - buttonPadding, buttonY + buttonHeight / 2 + 5);
-    
+    ctx.fillText(
+      "Cancel (🅰️)",
+      width / 2 - buttonWidth / 2 - buttonPadding,
+      buttonY + buttonHeight / 2 + 5
+    );
+
     // Confirm button
     ctx.fillStyle = "#e94560";
     ctx.fillRect(width / 2 + buttonPadding, buttonY, buttonWidth, buttonHeight);
     ctx.fillStyle = "white";
-    ctx.fillText("Install (🅱️)", width / 2 + buttonWidth / 2 + buttonPadding, buttonY + buttonHeight / 2 + 5);
+    ctx.fillText(
+      "Install (🅱️)",
+      width / 2 + buttonWidth / 2 + buttonPadding,
+      buttonY + buttonHeight / 2 + 5
+    );
   }
 
   installSelectedGame() {
     const item = this.getSelectedItem();
     if (!item) return;
-    
+
     console.log(`Installing game from: ${item.url}`);
-    
+
     // TODO: Implement game installation logic
     // 1. Extract game slug/name from URL or use sanitized name
     // 2. Fetch repository content
     // 3. Install to appropriate location
     // 4. Show success/failure message
-    
+
     // Example implementation (placeholder):
     /*
     const gameSlug = item.name.toLowerCase().replace(/\s+/g, '-');
@@ -360,7 +380,7 @@ export class Marketplace {
     // Clean up
     // rm -rf ${tempDir}
     */
-    
+
     // For now, just go back to the list
     this.showConfirmation = false;
   }

@@ -16,3 +16,6 @@
 
 # 2025-02-27 14:12:23.524229
 +okay, I had to move a few files around but that's really good! One bad thing is when the app starts, there is no loading screen. Also, we have to add the emoji font I added to public/fonts/NotoEmoji-Regular.ttf to get the arrows you used to work. And one TINY thing is that the directions to tell you to navigate up and down appear inside of an item instead of below it. 
+
+# 2025-02-27 14:47:30.541079
++okay, this is great! Really really good. Next up I need a screen that will show when you select one of the items by pressing BUTTON_EAST (which is a or b on a gamepad dpending on the style). This will be a confirmation screen. Pressing BUTTON_SOUTH will take you back to the list. BUTTON_EAST will confirm the selection. On this screen is the logo, name and description but with a more "page" like layout. And this time it will also include url that will be downloaded and a warning that any other game with the same slug will be overridden. In the code I need a cleer designation of where I need to add the code that will fetch that url and then do some system commands to install the game. 
