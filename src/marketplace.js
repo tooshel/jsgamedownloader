@@ -1,4 +1,5 @@
 import { createResourceLoader, drawLoadingScreen } from "./utils.js";
+import { fs } from "fs";
 
 // Constants for marketplace display
 const ITEM_HEIGHT = 80;
@@ -149,7 +150,7 @@ export class Marketplace {
     ctx.font = "24px Roboto";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("Game Marketplace", width / 2, TITLE_HEIGHT / 2 + 8);
+    ctx.fillText("JS Game Downloader", width / 2, TITLE_HEIGHT / 2 + 8);
 
     if (this.loading) {
       drawLoadingScreen(
@@ -429,7 +430,21 @@ export class Marketplace {
     ctx.font = "18px Roboto";
     ctx.fillStyle = "#cccccc";
     ctx.textAlign = "center";
-    ctx.fillText(`${item.name} has been installed successfully.`, width / 2, contentY + 120);
+    ctx.fillText(
+      `${item.name} has been installed successfully.`,
+      width / 2,
+      contentY + 120
+    );
+
+    // Reminder to refresh games
+    ctx.font = "18px Roboto";
+    ctx.fillStyle = "#cccccc";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      `Remember to refresh your games list in EmulationStation!`,
+      width / 2,
+      contentY + 160
+    );
 
     // Draw button prompt
     const buttonY = height - 60;
@@ -446,7 +461,7 @@ export class Marketplace {
     if (!item) return;
 
     console.log(`Installing game from: ${item.url}`);
-    
+
     this.installing = true;
     this.installProgress = 0;
     this.installStatus = "Preparing installation...";
@@ -455,33 +470,33 @@ export class Marketplace {
     try {
       // Step 1: Preparing
       await this.updateInstallProgress(0.1, "Preparing installation...", 800);
-      
+
       // Step 2: Downloading repository
       await this.updateInstallProgress(0.3, "Downloading repository...", 1500);
-      
+
       // Step 3: Extracting files
       await this.updateInstallProgress(0.5, "Extracting files...", 1000);
-      
+
       // Step 4: Installing dependencies
       await this.updateInstallProgress(0.7, "Installing dependencies...", 1200);
-      
+
       // Step 5: Configuring game
       await this.updateInstallProgress(0.9, "Configuring game...", 800);
-      
+
       // Step 6: Finishing up
       await this.updateInstallProgress(1.0, "Installation complete!", 500);
 
       // TODO: Actual implementation would go here
       // const gameSlug = item.name.toLowerCase().replace(/\s+/g, '-');
       // const tempDir = `./temp-${gameSlug}`;
-      // 
+      //
       // 1. Clone repository
       // await execCommand(`git clone ${item.url} ${tempDir}`);
-      // 
+      //
       // 2. Install game
       // await execCommand(`mkdir -p ./games/${gameSlug}`);
       // await execCommand(`cp -r ${tempDir}/* ./games/${gameSlug}/`);
-      // 
+      //
       // 3. Clean up
       // await execCommand(`rm -rf ${tempDir}`);
 
@@ -501,8 +516,8 @@ export class Marketplace {
   updateInstallProgress(progress, status, delay) {
     this.installProgress = progress;
     this.installStatus = status;
-    
-    return new Promise(resolve => setTimeout(resolve, delay));
+
+    return new Promise((resolve) => setTimeout(resolve, delay));
   }
 
   getSelectedItem() {
