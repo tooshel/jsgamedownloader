@@ -25,12 +25,12 @@ export class Marketplace {
 
   async loadFonts() {
     if (this.fontsLoaded) return;
-    
+
     await Promise.all([
       this.resourceLoader.addFont("Roboto", "fonts/Roboto-Regular.ttf"),
-      this.resourceLoader.addFont("NotoEmoji", "fonts/NotoEmoji-Regular.ttf")
+      this.resourceLoader.addFont("NotoEmoji", "fonts/NotoEmoji-Regular.ttf"),
     ]);
-    
+
     this.fontsLoaded = true;
   }
 
@@ -39,7 +39,7 @@ export class Marketplace {
     try {
       // Make sure fonts are loaded first
       await this.loadFonts();
-      
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch: ${response.status}`);
@@ -188,22 +188,22 @@ export class Marketplace {
       ctx.font = "20px NotoEmoji";
       ctx.fillStyle = "white";
       ctx.textAlign = "center";
-      ctx.fillText("↑", width / 2, TITLE_HEIGHT + 20);
+      ctx.fillText("⬆️", width / 2, TITLE_HEIGHT + 20);
     }
-    
+
     if (endIndex < this.items.length) {
       // Draw down arrow indicator
       ctx.font = "20px NotoEmoji";
       ctx.fillStyle = "white";
       ctx.textAlign = "center";
-      ctx.fillText("↓", width / 2, height - 40);
+      ctx.fillText("⬇️", width / 2, height - 40);
     }
 
     // Draw instructions at the bottom of the screen
     ctx.font = "14px Roboto, NotoEmoji";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("Use ↑/↓ to navigate", width / 2, height - 10);
+    ctx.fillText("Use ⬆️/⬇️ to navigate", width / 2, height - 10);
   }
 
   getSelectedItem() {

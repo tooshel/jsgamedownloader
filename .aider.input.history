@@ -13,3 +13,6 @@
 
 # 2025-02-27 13:54:56.508802
 +/run mkdir -p public\fonts
+
+# 2025-02-27 14:12:23.524229
++okay, I had to move a few files around but that's really good! One bad thing is when the app starts, there is no loading screen. Also, we have to add the emoji font I added to public/fonts/NotoEmoji-Regular.ttf to get the arrows you used to work. And one TINY thing is that the directions to tell you to navigate up and down appear inside of an item instead of below it. 
