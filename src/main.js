@@ -27,10 +27,11 @@ function update(elapsedTime) {
     inputState.canPlaySound = true;
   }
 
-  // Add cooldown for dpad to prevent too rapid scrolling
+  // Add cooldown for input to prevent too rapid actions
   const now = performance.now();
   if (now - inputState.lastDpadPress > inputState.dpadCooldown) {
-    if (p1.DPAD_UP.pressed || p1.DPAD_DOWN.pressed) {
+    if (p1.DPAD_UP.pressed || p1.DPAD_DOWN.pressed || 
+        p1.BUTTON_EAST.pressed || p1.BUTTON_SOUTH.pressed) {
       inputState.lastDpadPress = now;
       marketplace.update(p1);
     }

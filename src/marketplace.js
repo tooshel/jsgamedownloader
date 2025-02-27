@@ -21,6 +21,7 @@ export class Marketplace {
     this.loading = true;
     this.fontsLoaded = false;
     this.resourceLoader = createResourceLoader();
+    this.showConfirmation = false;
   }
 
   async loadFonts() {
@@ -65,41 +66,56 @@ export class Marketplace {
   update(input) {
     if (this.loading) return;
 
-    const prevIndex = this.selectedIndex;
+    if (this.showConfirmation) {
+      // Handle confirmation screen input
+      if (input.BUTTON_SOUTH.pressed) {
+        // Cancel and go back to list
+        this.showConfirmation = false;
+      } else if (input.BUTTON_EAST.pressed) {
+        // Confirm selection and install game
+        this.installSelectedGame();
+      }
+    } else {
+      // Handle list navigation
+      const prevIndex = this.selectedIndex;
 
-    if (input.DPAD_DOWN.pressed) {
-      this.selectedIndex = Math.min(
-        this.selectedIndex + 1,
-        this.items.length - 1
-      );
-    } else if (input.DPAD_UP.pressed) {
-      this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
-    }
-
-    // Adjust scroll if selection changed
-    if (prevIndex !== this.selectedIndex) {
-      // Calculate which page the selected item should be on
-      const targetPage = Math.floor(this.selectedIndex / ITEMS_PER_PAGE);
-      this.scrollOffset = targetPage * ITEMS_PER_PAGE;
-
-      // If selected item is at the bottom of the page, scroll down one more
-      if (
-        this.selectedIndex % ITEMS_PER_PAGE === ITEMS_PER_PAGE - 1 &&
-        this.selectedIndex < this.items.length - 1
-      ) {
-        this.scrollOffset += 1;
+      if (input.DPAD_DOWN.pressed) {
+        this.selectedIndex = Math.min(
+          this.selectedIndex + 1,
+          this.items.length - 1
+        );
+      } else if (input.DPAD_UP.pressed) {
+        this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+      } else if (input.BUTTON_EAST.pressed) {
+        // Show confirmation screen
+        this.showConfirmation = true;
       }
 
-      // If selected item is at the top of the page, scroll up one more
-      if (this.selectedIndex % ITEMS_PER_PAGE === 0 && this.selectedIndex > 0) {
-        this.scrollOffset -= 1;
-      }
+      // Adjust scroll if selection changed
+      if (prevIndex !== this.selectedIndex) {
+        // Calculate which page the selected item should be on
+        const targetPage = Math.floor(this.selectedIndex / ITEMS_PER_PAGE);
+        this.scrollOffset = targetPage * ITEMS_PER_PAGE;
 
-      // Ensure scroll offset is valid
-      this.scrollOffset = Math.max(
-        0,
-        Math.min(this.scrollOffset, this.items.length - ITEMS_PER_PAGE)
-      );
+        // If selected item is at the bottom of the page, scroll down one more
+        if (
+          this.selectedIndex % ITEMS_PER_PAGE === ITEMS_PER_PAGE - 1 &&
+          this.selectedIndex < this.items.length - 1
+        ) {
+          this.scrollOffset += 1;
+        }
+
+        // If selected item is at the top of the page, scroll up one more
+        if (this.selectedIndex % ITEMS_PER_PAGE === 0 && this.selectedIndex > 0) {
+          this.scrollOffset -= 1;
+        }
+
+        // Ensure scroll offset is valid
+        this.scrollOffset = Math.max(
+          0,
+          Math.min(this.scrollOffset, this.items.length - ITEMS_PER_PAGE)
+        );
+      }
     }
   }
 
@@ -110,16 +126,16 @@ export class Marketplace {
     ctx.fillStyle = "#1a1a2e";
     ctx.fillRect(0, 0, width, height);
 
-    // Draw header
-    ctx.fillStyle = "#0f3460";
-    ctx.fillRect(0, 0, width, TITLE_HEIGHT);
-
-    ctx.font = "24px Roboto";
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-    ctx.fillText("Game Marketplace", width / 2, TITLE_HEIGHT / 2 + 8);
-
     if (this.loading) {
+      // Draw header
+      ctx.fillStyle = "#0f3460";
+      ctx.fillRect(0, 0, width, TITLE_HEIGHT);
+
+      ctx.font = "24px Roboto";
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.fillText("Game Marketplace", width / 2, TITLE_HEIGHT / 2 + 8);
+      
       drawLoadingScreen(
         ctx,
         this.resourceLoader.getPercentComplete(),
@@ -128,6 +144,20 @@ export class Marketplace {
       );
       return;
     }
+
+    if (this.showConfirmation) {
+      this.drawConfirmationScreen();
+      return;
+    }
+
+    // Draw header
+    ctx.fillStyle = "#0f3460";
+    ctx.fillRect(0, 0, width, TITLE_HEIGHT);
+
+    ctx.font = "24px Roboto";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Game Marketplace", width / 2, TITLE_HEIGHT / 2 + 8);
 
     if (this.items.length === 0) {
       ctx.font = "20px Roboto";
@@ -203,7 +233,136 @@ export class Marketplace {
     ctx.font = "14px Roboto, NotoEmoji";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("Use ⬆️/⬇️ to navigate", width / 2, height - 10);
+    ctx.fillText("Use ⬆️/⬇️ to navigate, 🅱️ to select", width / 2, height - 10);
+  }
+
+  drawConfirmationScreen() {
+    const { ctx, width, height } = this;
+    const item = this.getSelectedItem();
+    if (!item) return;
+
+    // Draw header
+    ctx.fillStyle = "#0f3460";
+    ctx.fillRect(0, 0, width, TITLE_HEIGHT);
+
+    ctx.font = "24px Roboto";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Confirm Installation", width / 2, TITLE_HEIGHT / 2 + 8);
+
+    // Draw content area
+    const contentY = TITLE_HEIGHT + 20;
+    const contentHeight = height - contentY - 60; // Leave space for buttons
+    
+    // Draw item icon if available
+    if (item.icon && this.resourceLoader.images[item.name]) {
+      const iconSize = 100;
+      ctx.drawImage(
+        this.resourceLoader.images[item.name],
+        width / 2 - iconSize / 2,
+        contentY,
+        iconSize,
+        iconSize
+      );
+    }
+
+    // Draw item name
+    const nameY = contentY + 120;
+    ctx.font = "bold 24px Roboto";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText(item.name, width / 2, nameY);
+
+    // Draw item description
+    const descY = nameY + 40;
+    ctx.font = "16px Roboto";
+    ctx.fillStyle = "#cccccc";
+    ctx.textAlign = "center";
+    
+    // Word wrap description
+    const description = item.description || "";
+    const words = description.split(' ');
+    const maxWidth = width - PADDING * 4;
+    let line = '';
+    let lineY = descY;
+    
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i] + ' ';
+      const metrics = ctx.measureText(testLine);
+      
+      if (metrics.width > maxWidth && i > 0) {
+        ctx.fillText(line, width / 2, lineY);
+        line = words[i] + ' ';
+        lineY += 25;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, width / 2, lineY);
+    
+    // Draw URL
+    const urlY = lineY + 40;
+    ctx.font = "14px Roboto";
+    ctx.fillStyle = "#e94560";
+    ctx.fillText(`Repository: ${item.url}`, width / 2, urlY);
+    
+    // Draw warning
+    const warningY = urlY + 30;
+    ctx.fillStyle = "#ffcc00";
+    ctx.font = "14px Roboto";
+    ctx.fillText("Warning: This will override any existing game with the same name.", width / 2, warningY);
+    
+    // Draw buttons
+    const buttonY = height - 50;
+    const buttonWidth = 150;
+    const buttonHeight = 40;
+    const buttonPadding = 20;
+    
+    // Cancel button
+    ctx.fillStyle = "#16213e";
+    ctx.fillRect(width / 2 - buttonWidth - buttonPadding, buttonY, buttonWidth, buttonHeight);
+    ctx.font = "16px Roboto";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Cancel (🅰️)", width / 2 - buttonWidth / 2 - buttonPadding, buttonY + buttonHeight / 2 + 5);
+    
+    // Confirm button
+    ctx.fillStyle = "#e94560";
+    ctx.fillRect(width / 2 + buttonPadding, buttonY, buttonWidth, buttonHeight);
+    ctx.fillStyle = "white";
+    ctx.fillText("Install (🅱️)", width / 2 + buttonWidth / 2 + buttonPadding, buttonY + buttonHeight / 2 + 5);
+  }
+
+  installSelectedGame() {
+    const item = this.getSelectedItem();
+    if (!item) return;
+    
+    console.log(`Installing game from: ${item.url}`);
+    
+    // TODO: Implement game installation logic
+    // 1. Extract game slug/name from URL or use sanitized name
+    // 2. Fetch repository content
+    // 3. Install to appropriate location
+    // 4. Show success/failure message
+    
+    // Example implementation (placeholder):
+    /*
+    const gameSlug = item.name.toLowerCase().replace(/\s+/g, '-');
+    const tempDir = `./temp-${gameSlug}`;
+    
+    // Clone repository
+    // git clone ${item.url} ${tempDir}
+    
+    // Install game
+    // mkdir -p ./games/${gameSlug}
+    // cp -r ${tempDir}/* ./games/${gameSlug}/
+    
+    // Clean up
+    // rm -rf ${tempDir}
+    */
+    
+    // For now, just go back to the list
+    this.showConfirmation = false;
   }
 
   getSelectedItem() {
