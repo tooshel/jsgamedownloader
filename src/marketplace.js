@@ -1,5 +1,4 @@
-import { createResourceLoader, drawLoadingScreen } from "./utils.js";
-import { fs } from "fs";
+import { createResourceLoader, drawLoadingScreen, execCommand } from "./utils.js";
 
 // Constants for marketplace display
 const ITEM_HEIGHT = 80;
