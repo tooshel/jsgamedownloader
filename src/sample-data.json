@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Space Shooter",
+    "description": "Classic arcade-style space shooter game",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/space-shooter"
+  },
+  {
+    "name": "Platformer Adventure",
+    "description": "2D platformer with pixel art graphics",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/platformer"
+  },
+  {
+    "name": "Puzzle Quest",
+    "description": "Brain-teasing puzzle game with multiple levels",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/puzzle-quest"
+  },
+  {
+    "name": "Racing Simulator",
+    "description": "Top-down racing game with multiple tracks",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/racing-sim"
+  },
+  {
+    "name": "RPG World",
+    "description": "Fantasy role-playing game with turn-based combat",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/rpg-world"
+  },
+  {
+    "name": "Strategy Commander",
+    "description": "Real-time strategy game with resource management",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/strategy-commander"
+  },
+  {
+    "name": "Zombie Survival",
+    "description": "Survive waves of zombies in this action game",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/zombie-survival"
+  },
+  {
+    "name": "Card Battler",
+    "description": "Collectible card game with strategic gameplay",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/card-battler"
+  },
+  {
+    "name": "Dungeon Crawler",
+    "description": "Explore procedurally generated dungeons",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/dungeon-crawler"
+  },
+  {
+    "name": "Tower Defense",
+    "description": "Strategic tower defense game with multiple enemy types",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/tower-defense"
+  }
+]

@@ -45,6 +45,18 @@ export function loadImage(src) {
   });
 }
 
+export function loadFont(fontFamily, url) {
+  return new Promise((resolve, reject) => {
+    const fontFace = new FontFace(fontFamily, `url(${url})`);
+    fontFace.load()
+      .then(loadedFace => {
+        document.fonts.add(loadedFace);
+        resolve(fontFamily);
+      })
+      .catch(err => reject(err));
+  });
+}
+
 export function createResourceLoader() {
   return {
     imgCount: 0,
@@ -61,6 +73,16 @@ export function createResourceLoader() {
         this.images[name] = img;
         this.imgLoadedCount++;
         return img;
+      });
+      this.imagePromises.push(promise);
+      return promise;
+    },
+    addFont(name, src) {
+      this.imgCount++;
+      const promise = loadFont(name, src).then((fontFamily) => {
+        this.images[name] = fontFamily;
+        this.imgLoadedCount++;
+        return fontFamily;
       });
       this.imagePromises.push(promise);
       return promise;

@@ -1,4 +1,5 @@
-import { loadSound, loadImage, playSound, getInput } from './utils.js';
+import { loadSound, getInput } from './utils.js';
+import { Marketplace } from './marketplace.js';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -6,43 +7,38 @@ const ctx = canvas.getContext('2d');
 const { width, height } = canvas;
 let lastTime;
 let laserSound;
-let playerImg;
+let marketplace;
 
-const player = {
-  x: width / 2, // center of the screen
-  y: height / 2, // center of the screen
-  width: width * 0.1, // 10% of the screen width
-  height: width * 0.1, // 10% of the screen width
-  canPlaySound: true, // have to release the button to play again
-  speed: width * 0.0005, // 0.05% of the screen width per millisecond  
+// Track input state to prevent continuous triggering
+const inputState = {
+  canPlaySound: true,
+  lastDpadPress: 0,
+  dpadCooldown: 200 // milliseconds
 };
 
 function update(elapsedTime) {
   const [p1] = getInput();
-  if (p1.BUTTON_SOUTH.pressed && player.canPlaySound) {
+  
+  // Handle sound effect
+  if (p1.BUTTON_SOUTH.pressed && inputState.canPlaySound) {
     playSound(laserSound);
-    player.canPlaySound = false;
+    inputState.canPlaySound = false;
   } else if (!p1.BUTTON_SOUTH.pressed) {
-    player.canPlaySound = true;
+    inputState.canPlaySound = true;
   }
-
-  if (p1.DPAD_LEFT.pressed) {
-    player.x -= player.speed * elapsedTime;
-  } else if (p1.DPAD_RIGHT.pressed) {
-    player.x += player.speed * elapsedTime;
-  }
-
-  if (p1.DPAD_UP.pressed) {
-    player.y -= player.speed * elapsedTime;
-  } else if (p1.DPAD_DOWN.pressed) {
-    player.y += player.speed * elapsedTime;
+  
+  // Add cooldown for dpad to prevent too rapid scrolling
+  const now = performance.now();
+  if (now - inputState.lastDpadPress > inputState.dpadCooldown) {
+    if (p1.DPAD_UP.pressed || p1.DPAD_DOWN.pressed) {
+      inputState.lastDpadPress = now;
+      marketplace.update(p1);
+    }
   }
 }
 
 function draw() {
-  ctx.fillStyle = 'blue';
-  ctx.fillRect(0, 0, width, height);
-  ctx.drawImage(playerImg, player.x, player.y, player.width, player.width);
+  marketplace.draw();
 }
 
 function gameLoop() {
@@ -54,12 +50,38 @@ function gameLoop() {
 }
 
 async function launch() {
-  // wait for assets to load
+  // Create marketplace instance
+  marketplace = new Marketplace(canvas);
+  
+  // Load sound effect
   laserSound = await loadSound('sounds/laser.mp3');
-  playerImg = await loadImage('images/js.png');
+  
+  // Fetch marketplace items from our sample data
+  await marketplace.fetchItems('sample-data.json');
+  
+  // Start game loop
   lastTime = performance.now();
   gameLoop();
 }
 
+// Helper function to play sound (moved from utils import)
+function playSound(audioBuffer, loop = false) {
+  if (!audioBuffer) {
+    return;
+  }
+  const audioContext = new AudioContext();
+  const bufferSource = audioContext.createBufferSource();
+  bufferSource.buffer = audioBuffer;
+
+  bufferSource.connect(audioContext.destination);
+  if (loop) {
+    bufferSource.loop = true;
+  }
+  bufferSource.start();
+  bufferSource.onended = () => {
+    bufferSource.disconnect();
+  };
+  return bufferSource;
+}
 
 launch();
