@@ -26,7 +26,9 @@ export class Marketplace {
     this.installProgress = 0;
     this.installStatus = "";
     this.installComplete = false;
+    this.installFailed = false;
     this.installedGamePath = null;
+    this.errorMessage = "";
   }
 
   async loadFonts() {
@@ -150,6 +152,17 @@ export class Marketplace {
         this.installComplete = false;
         this.showConfirmation = false;
       }
+    } else if (this.installFailed) {
+      // Handle failed installation screen input
+      if (input.BUTTON_SOUTH.pressed) {
+        // Cancel and go back to list
+        this.installFailed = false;
+        this.showConfirmation = false;
+      } else if (input.BUTTON_EAST.pressed) {
+        // Retry installation
+        this.installFailed = false;
+        this.installSelectedGame();
+      }
     } else if (this.showConfirmation) {
       // Handle confirmation screen input
       if (input.BUTTON_SOUTH.pressed) {
@@ -239,6 +252,11 @@ export class Marketplace {
 
     if (this.installComplete) {
       this.drawInstallCompleteScreen();
+      return;
+    }
+    
+    if (this.installFailed) {
+      this.drawInstallFailedScreen();
       return;
     }
 
@@ -524,7 +542,7 @@ export class Marketplace {
     ctx.fillText(
       `Remember to refresh your games list!`,
       width / 2,
-      contentY + 160
+      contentY + 190
     );
 
     // Draw button prompt
@@ -687,12 +705,101 @@ export class Marketplace {
       console.error("Installation failed:", error);
       this.installStatus = "Installation failed: " + error.message;
       
-      // After a delay, go back to confirmation screen
-      setTimeout(() => {
-        this.installing = false;
-        this.showConfirmation = false;  // Go back to the list view
-      }, 3000);
+      // Show error screen with retry option
+      this.installProgress = 1.0; // Fill progress bar
+      this.installing = false;
+      this.installFailed = true;
+      this.installComplete = false;
     }
+  }
+
+  drawInstallFailedScreen() {
+    const { ctx, width, height } = this;
+    const item = this.getSelectedItem();
+    if (!item) return;
+
+    const contentY = TITLE_HEIGHT + 60;
+
+    // Draw error icon
+    ctx.font = "60px NotoEmoji";
+    ctx.fillStyle = "#e74c3c";
+    ctx.textAlign = "center";
+    ctx.fillText("❌", width / 2, contentY);
+
+    // Draw error message
+    ctx.font = "bold 24px Roboto";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Installation Failed", width / 2, contentY + 80);
+
+    // Draw game name
+    ctx.font = "18px Roboto";
+    ctx.fillStyle = "#cccccc";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      `Could not install ${item.name}`,
+      width / 2,
+      contentY + 120
+    );
+
+    // Draw error details
+    ctx.font = "16px Roboto";
+    ctx.fillStyle = "#e94560";
+    ctx.textAlign = "center";
+    
+    // Word wrap error message
+    const errorMsg = this.installStatus || "Unknown error occurred";
+    const words = errorMsg.split(" ");
+    const maxWidth = width - PADDING * 4;
+    let line = "";
+    let lineY = contentY + 160;
+
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i] + " ";
+      const metrics = ctx.measureText(testLine);
+
+      if (metrics.width > maxWidth && i > 0) {
+        ctx.fillText(line, width / 2, lineY);
+        line = words[i] + " ";
+        lineY += 25;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, width / 2, lineY);
+
+    // Draw buttons
+    const buttonY = height - 60;
+    const buttonWidth = 150;
+    const buttonHeight = 40;
+    const buttonPadding = 20;
+
+    // Cancel button
+    ctx.fillStyle = "#16213e";
+    ctx.fillRect(
+      width / 2 - buttonWidth - buttonPadding,
+      buttonY,
+      buttonWidth,
+      buttonHeight
+    );
+    ctx.font = "16px Roboto, NotoEmoji";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      "Cancel (🅰️)",
+      width / 2 - buttonWidth / 2 - buttonPadding,
+      buttonY + buttonHeight / 2 + 5
+    );
+
+    // Retry button
+    ctx.fillStyle = "#e94560";
+    ctx.fillRect(width / 2 + buttonPadding, buttonY, buttonWidth, buttonHeight);
+    ctx.fillStyle = "white";
+    ctx.fillText(
+      "Retry (🅱️)",
+      width / 2 + buttonWidth / 2 + buttonPadding,
+      buttonY + buttonHeight / 2 + 5
+    );
   }
 
   updateInstallProgress(progress, status, delay) {
