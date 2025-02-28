@@ -1,4 +1,8 @@
-import { createResourceLoader, drawLoadingScreen, execCommand } from "./utils.js";
+import {
+  createResourceLoader,
+  drawLoadingScreen,
+  execCommand,
+} from "./utils.js";
 
 // Constants for marketplace display
 const ITEM_HEIGHT = 80;
@@ -41,7 +45,7 @@ export class Marketplace {
 
     this.fontsLoaded = true;
   }
-  
+
   /**
    * Check if a directory exists
    * @param {string} path - Path to check
@@ -50,38 +54,45 @@ export class Marketplace {
   async checkDirectoryExists(path) {
     try {
       console.log(`Checking if directory exists: ${path}`);
-      
+
       try {
         // Try to use Node.js fs module
-        const fs = await import('fs').catch(() => null);
-        
+        const fs = await import("fs").catch(() => null);
+
         if (fs) {
           try {
-            await fs.promises.access(path, fs.constants.R_OK | fs.constants.W_OK);
+            await fs.promises.access(
+              path,
+              fs.constants.R_OK | fs.constants.W_OK
+            );
             console.log(`Directory ${path} exists and is accessible`);
             return true;
           } catch (error) {
-            console.log(`Directory ${path} does not exist or is not accessible`);
+            console.log(
+              `Directory ${path} does not exist or is not accessible`
+            );
             return false;
           }
         }
       } catch (error) {
         console.warn("Node.js fs module not available, using simulation");
       }
-      
+
       // Fallback to simulation for browser environments
       // For testing, we'll only check one path as requested
-      const commonPaths = ['./games'];
-      
+      const commonPaths = ["./games"];
+
       const exists = commonPaths.includes(path);
-      console.log(`[SIMULATION] Directory ${path} ${exists ? 'exists' : 'does not exist'}`);
+      console.log(
+        `[SIMULATION] Directory ${path} ${exists ? "exists" : "does not exist"}`
+      );
       return exists;
     } catch (error) {
       console.error(`Error checking directory ${path}:`, error);
       return false;
     }
   }
-  
+
   /**
    * Find a valid installation directory from a list of potential paths
    * @returns {Promise<string|null>} - Valid installation path or null if none found
@@ -89,35 +100,39 @@ export class Marketplace {
   async findInstallationDirectory() {
     // List of potential installation directories to check in order of preference
     // For testing, we'll only check one path as requested
-    const potentialPaths = ['./games'];
-    
+    const potentialPaths = ["./games"];
+
     // Check each path in order
     for (const path of potentialPaths) {
       if (await this.checkDirectoryExists(path)) {
         return path;
       }
     }
-    
+
     // If no valid path found, try to create the games directory
     try {
-      console.log("No existing installation directory found. Attempting to create one.");
-      
+      console.log(
+        "No existing installation directory found. Attempting to create one."
+      );
+
       try {
         // Try to use Node.js fs module
-        const fs = await import('fs').catch(() => null);
-        
+        const fs = await import("fs").catch(() => null);
+
         if (fs) {
-          await fs.promises.mkdir('./games', { recursive: true });
+          await fs.promises.mkdir("./games", { recursive: true });
           console.log("Successfully created directory: ./games");
-          return './games';
+          return "./games";
         }
       } catch (error) {
         console.warn("Failed to create directory using Node.js:", error);
       }
-      
+
       // Fallback for browser environments
-      console.warn("Node.js fs module not available, simulating directory creation");
-      return './games';
+      console.warn(
+        "Node.js fs module not available, simulating directory creation"
+      );
+      return "./games";
     } catch (error) {
       console.error("Failed to create installation directory:", error);
       return null;
@@ -266,7 +281,7 @@ export class Marketplace {
       this.drawInstallCompleteScreen();
       return;
     }
-    
+
     if (this.installFailed) {
       this.drawInstallFailedScreen();
       return;
@@ -505,20 +520,29 @@ export class Marketplace {
     ctx.fillStyle = "#cccccc";
     ctx.textAlign = "center";
     ctx.fillText(this.installStatus, width / 2, barY + barHeight + 40);
-    
+
     // Check if we're in simulation mode and show a notice
-    try {
-      const fs = require('fs');
-    } catch (error) {
-      // If we can't require fs, we're in browser mode
+
+    if (globalThis._jsg) {
+      ctx.font = "12px Roboto";
+      ctx.fillStyle = "#ffcc00";
+      ctx.textAlign = "center";
+      ctx.fillText(`REAL Mode: ${globalThis._jsg.rom}`, width / 2, height - 20);
+    } else {
       ctx.font = "12px Roboto";
       ctx.fillStyle = "#ffcc00";
       ctx.textAlign = "center";
       ctx.fillText(
-        "Running in simulation mode - actual installation requires Node.js",
+        "Simulation Mode - actual installation requires fs access",
         width / 2,
         height - 20
       );
+    }
+
+    try {
+      const fs = require("fs");
+    } catch (error) {
+      // If we can't require fs, we're in browser mode
     }
   }
 
@@ -552,7 +576,7 @@ export class Marketplace {
     );
 
     // Draw installation path
-    const gameSlug = item.name.toLowerCase().replace(/\s+/g, '-');
+    const gameSlug = item.name.toLowerCase().replace(/\s+/g, "-");
     ctx.font = "16px Roboto";
     ctx.fillStyle = "#e94560";
     ctx.textAlign = "center";
@@ -594,21 +618,27 @@ export class Marketplace {
 
     try {
       // Step 1: Find installation directory
-      await this.updateInstallProgress(0.05, "Finding installation directory...", 500);
+      await this.updateInstallProgress(
+        0.05,
+        "Finding installation directory...",
+        500
+      );
       const installDir = await this.findInstallationDirectory();
-      
+
       if (!installDir) {
-        throw new Error("No valid installation directory found. Please create a 'games' folder.");
+        throw new Error(
+          "No valid installation directory found. Please create a 'games' folder."
+        );
       }
-      
+
       // Step 2: Prepare installation
       await this.updateInstallProgress(0.1, "Preparing installation...", 800);
-      
+
       // Create a slug from the game name for the folder name
-      const gameSlug = item.name.toLowerCase().replace(/\s+/g, '-');
+      const gameSlug = item.name.toLowerCase().replace(/\s+/g, "-");
       const gameDir = `${installDir}/${gameSlug}`;
       const tempDir = `./temp-${gameSlug}`;
-      
+
       // Check if game directory already exists
       const gameExists = await this.checkDirectoryExists(gameDir);
       if (gameExists) {
@@ -617,31 +647,38 @@ export class Marketplace {
         // 1. Backup existing files
         // 2. Remove existing directory
         // 3. Or prompt user for confirmation to overwrite
-        
+
         // For demo, we'll just continue and simulate overwriting
-        await this.updateInstallProgress(0.15, "Preparing to update existing game...", 500);
+        await this.updateInstallProgress(
+          0.15,
+          "Preparing to update existing game...",
+          500
+        );
       }
-      
+
       // Step 3: Download repository
       await this.updateInstallProgress(0.3, "Downloading repository...", 1500);
-      
+
       try {
         // Check if URL is valid
-        if (!item.url || !item.url.startsWith('http')) {
+        if (!item.url || !item.url.startsWith("http")) {
           throw new Error("Invalid repository URL");
         }
-        
+
         let usingNodeJs = false;
-        
+
         try {
           // Try to use Node.js modules
-          const fs = await import('fs').catch(() => null);
-          
+          const fs = await import("fs").catch(() => null);
+
           if (fs) {
             usingNodeJs = true;
-            
+
             // First try git clone if it's a git repository
-            if (item.url.includes('github.com') || item.url.includes('gitlab.com')) {
+            if (
+              item.url.includes("github.com") ||
+              item.url.includes("gitlab.com")
+            ) {
               try {
                 // Make sure temp directory doesn't exist
                 try {
@@ -649,12 +686,19 @@ export class Marketplace {
                 } catch (e) {
                   // Ignore errors if directory doesn't exist
                 }
-                
-                await this.updateInstallProgress(0.35, "Cloning git repository...", 500);
+
+                await this.updateInstallProgress(
+                  0.35,
+                  "Cloning git repository...",
+                  500
+                );
                 await execCommand(`git clone ${item.url} ${tempDir}`);
                 console.log(`Successfully cloned repository to ${tempDir}`);
               } catch (gitError) {
-                console.warn("Git clone failed, falling back to direct download:", gitError);
+                console.warn(
+                  "Git clone failed, falling back to direct download:",
+                  gitError
+                );
                 throw gitError; // Force fallback to direct download
               }
             } else {
@@ -665,133 +709,143 @@ export class Marketplace {
           // If git clone failed or we're in a browser, try direct download
           if (usingNodeJs) {
             console.log("Falling back to direct download");
-            await this.updateInstallProgress(0.4, "Downloading zip file...", 800);
-            
+            await this.updateInstallProgress(
+              0.4,
+              "Downloading zip file...",
+              800
+            );
+
             // For Node.js, we can use fetch and fs
-            const fs = await import('fs');
+            const fs = await import("fs");
             const response = await fetch(item.url);
-            
+
             if (!response.ok) {
               throw new Error(`Failed to download: ${response.status}`);
             }
-            
+
             const arrayBuffer = await response.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
-            
+
             // Create temp directory if it doesn't exist
             await fs.promises.mkdir(tempDir, { recursive: true });
-            
+
             // Write zip file
             const zipPath = `${tempDir}.zip`;
             await fs.promises.writeFile(zipPath, buffer);
-            
+
             // Extract zip file
             await execCommand(`unzip ${zipPath} -d ${tempDir}`);
           } else {
             // For browser, simulate download
             console.log(`Simulating download from: ${item.url}`);
-            await this.updateInstallProgress(0.4, "Downloading (simulated)...", 1000);
+            await this.updateInstallProgress(
+              0.4,
+              "Downloading (simulated)...",
+              1000
+            );
           }
         }
       } catch (error) {
         throw new Error(`Failed to download repository: ${error.message}`);
       }
-      
+
       // Step 4: Extract files
       await this.updateInstallProgress(0.5, "Extracting files...", 1000);
-      
+
       try {
         let usingNodeJs = false;
-        
+
         try {
           // Try to use Node.js modules
-          const fs = await import('fs').catch(() => null);
-          
+          const fs = await import("fs").catch(() => null);
+
           if (fs) {
             usingNodeJs = true;
-            
+
             // Create game directory if it doesn't exist
             await fs.promises.mkdir(gameDir, { recursive: true });
-            
+
             // Copy files from temp directory to game directory
-            if (process.platform === 'win32') {
+            if (process.platform === "win32") {
               // Windows
               await execCommand(`xcopy /E /I /Y "${tempDir}\\*" "${gameDir}"`);
             } else {
               // Unix-like
               await execCommand(`cp -r ${tempDir}/* ${gameDir}/`);
             }
-            
+
             console.log(`Successfully copied files to ${gameDir}`);
           }
         } catch (error) {
           if (usingNodeJs) {
             throw error; // Re-throw if we're using Node.js but it failed
           }
-          
+
           // For browser, simulate extraction
           console.log(`Simulating extraction to: ${gameDir}`);
         }
       } catch (error) {
         throw new Error(`Failed to extract files: ${error.message}`);
       }
-      
+
       // Step 5: Install dependencies
       await this.updateInstallProgress(0.7, "Installing dependencies...", 1200);
-      
+
       try {
         // In a real implementation:
         // 1. Check for package.json
         //    const hasPackageJson = await fs.promises.access(`${gameDir}/package.json`)
         //      .then(() => true)
         //      .catch(() => false);
-        // 
+        //
         // 2. If it exists, run npm install
         //    if (hasPackageJson) {
         //      await execCommand(`cd ${gameDir} && npm install`);
         //    }
-        
+
         // For demo, simulate dependency installation
         console.log(`Simulating dependency installation in: ${gameDir}`);
       } catch (error) {
         // Non-critical error - log but continue
-        console.warn(`Warning: Failed to install dependencies: ${error.message}`);
+        console.warn(
+          `Warning: Failed to install dependencies: ${error.message}`
+        );
       }
-      
+
       // Step 6: Configure game
       await this.updateInstallProgress(0.9, "Configuring game...", 800);
-      
+
       try {
         // In a real implementation:
         // 1. Create configuration files if needed
         // 2. Set up game-specific settings
         // 3. Create launcher shortcuts or entries
-        
+
         // For demo, simulate configuration
         console.log(`Simulating game configuration in: ${gameDir}`);
       } catch (error) {
         // Non-critical error - log but continue
         console.warn(`Warning: Failed to configure game: ${error.message}`);
       }
-      
+
       // Step 7: Finishing up
       await this.updateInstallProgress(1.0, "Installation complete!", 500);
-      
+
       try {
         let usingNodeJs = false;
-        
+
         try {
           // Try to use Node.js modules
-          const fs = await import('fs').catch(() => null);
-          
+          const fs = await import("fs").catch(() => null);
+
           if (fs) {
             usingNodeJs = true;
-            
+
             // Clean up temporary files
-            if (process.platform === 'win32') {
+            if (process.platform === "win32") {
               // Windows
               await execCommand(`rmdir /S /Q "${tempDir}"`);
-              
+
               // Remove zip file if it exists
               try {
                 await fs.promises.access(`${tempDir}.zip`);
@@ -802,7 +856,7 @@ export class Marketplace {
             } else {
               // Unix-like
               await execCommand(`rm -rf ${tempDir}`);
-              
+
               // Remove zip file if it exists
               try {
                 await fs.promises.access(`${tempDir}.zip`);
@@ -811,33 +865,35 @@ export class Marketplace {
                 // Ignore if file doesn't exist
               }
             }
-            
+
             console.log(`Successfully cleaned up temporary files`);
           }
         } catch (error) {
           if (usingNodeJs) {
             throw error; // Re-throw if we're using Node.js but it failed
           }
-          
+
           // For browser, simulate cleanup
           console.log(`Simulating cleanup of: ${tempDir}`);
         }
       } catch (error) {
         // Non-critical error - log but continue
-        console.warn(`Warning: Failed to clean up temporary files: ${error.message}`);
+        console.warn(
+          `Warning: Failed to clean up temporary files: ${error.message}`
+        );
       }
-      
+
       // Store the installation path for the completion screen
       this.installedGamePath = gameDir;
       console.log(`Game installed successfully to ${gameDir}`);
-      
+
       // Show completion screen
       this.installing = false;
       this.installComplete = true;
     } catch (error) {
       console.error("Installation failed:", error);
       this.installStatus = "Installation failed: " + error.message;
-      
+
       // Show error screen with retry option
       this.installProgress = 1.0; // Fill progress bar
       this.installing = false;
@@ -869,17 +925,13 @@ export class Marketplace {
     ctx.font = "18px Roboto";
     ctx.fillStyle = "#cccccc";
     ctx.textAlign = "center";
-    ctx.fillText(
-      `Could not install ${item.name}`,
-      width / 2,
-      contentY + 120
-    );
+    ctx.fillText(`Could not install ${item.name}`, width / 2, contentY + 120);
 
     // Draw error details
     ctx.font = "16px Roboto";
     ctx.fillStyle = "#e94560";
     ctx.textAlign = "center";
-    
+
     // Word wrap error message
     const errorMsg = this.installStatus || "Unknown error occurred";
     const words = errorMsg.split(" ");
