@@ -164,38 +164,46 @@ export function drawLoadingScreen(
 }
 
 /**
- * Execute a shell command (placeholder for actual implementation)
+ * Execute a shell command
  * @param {string} command - Command to execute
  * @returns {Promise<string>} - Command output
  */
 export async function execCommand(command) {
   console.log(`Executing command: ${command}`);
 
-  // In a browser environment, we can't directly execute shell commands
-  // In a real implementation with Node.js/Electron, you would use:
-  // const { exec } = require('child_process');
-  // return new Promise((resolve, reject) => {
-  //   exec(command, (error, stdout, stderr) => {
-  //     if (error) {
-  //       reject(new Error(`Command failed: ${error.message}`));
-  //       return;
-  //     }
-  //     resolve(stdout);
-  //   });
-  // });
-
-  // Placeholder implementation - simulate command execution
-  return new Promise((resolve, reject) => {
-    // Simulate command execution time
-    setTimeout(() => {
-      // Simulate success or failure based on command
-      if (command.includes("invalid")) {
-        reject(new Error(`Command failed: ${command}`));
-      } else {
-        resolve(`Command executed successfully: ${command}`);
-      }
-    }, 500);
-  });
+  try {
+    // Try to use Node.js child_process
+    const { exec } = await import('child_process').catch(() => ({}));
+    
+    if (exec) {
+      return new Promise((resolve, reject) => {
+        exec(command, (error, stdout, stderr) => {
+          if (error) {
+            reject(new Error(`Command failed: ${error.message}`));
+            return;
+          }
+          resolve(stdout);
+        });
+      });
+    } else {
+      console.warn("Node.js child_process module not available, simulating command execution");
+      // Fallback to simulation for browser environments
+      return new Promise((resolve, reject) => {
+        // Simulate command execution time
+        setTimeout(() => {
+          // Simulate success or failure based on command
+          if (command.includes("invalid")) {
+            reject(new Error(`Command failed: ${command}`));
+          } else {
+            resolve(`Command executed successfully: ${command}`);
+          }
+        }, 500);
+      });
+    }
+  } catch (error) {
+    console.error("Error executing command:", error);
+    throw error;
+  }
 }
 
 function getDefaultBtn() {

@@ -49,27 +49,32 @@ export class Marketplace {
    */
   async checkDirectoryExists(path) {
     try {
-      // In a browser environment, we can't directly check the file system
-      // So we'll simulate a check by trying to list files in the directory
-      // In a real Electron app, you would use Node.js fs module:
-      // const fs = require('fs');
-      // await fs.promises.access(path, fs.constants.R_OK | fs.constants.W_OK);
-      
       console.log(`Checking if directory exists: ${path}`);
       
-      // For demo purposes, simulate checking common installation paths
-      const commonPaths = [
-        './games',
-        './installed-games',
-        './public/games',
-        'C:/Games',
-        '/home/user/games'
-      ];
+      try {
+        // Try to use Node.js fs module
+        const fs = await import('fs').catch(() => null);
+        
+        if (fs) {
+          try {
+            await fs.promises.access(path, fs.constants.R_OK | fs.constants.W_OK);
+            console.log(`Directory ${path} exists and is accessible`);
+            return true;
+          } catch (error) {
+            console.log(`Directory ${path} does not exist or is not accessible`);
+            return false;
+          }
+        }
+      } catch (error) {
+        console.warn("Node.js fs module not available, using simulation");
+      }
       
-      // Simulate path check (replace with actual implementation)
-      // For demo, pretend the first path exists
+      // Fallback to simulation for browser environments
+      // For testing, we'll only check one path as requested
+      const commonPaths = ['./games'];
+      
       const exists = commonPaths.includes(path);
-      console.log(`Directory ${path} ${exists ? 'exists' : 'does not exist'}`);
+      console.log(`[SIMULATION] Directory ${path} ${exists ? 'exists' : 'does not exist'}`);
       return exists;
     } catch (error) {
       console.error(`Error checking directory ${path}:`, error);
@@ -83,13 +88,8 @@ export class Marketplace {
    */
   async findInstallationDirectory() {
     // List of potential installation directories to check in order of preference
-    const potentialPaths = [
-      './games',                   // Current directory
-      './public/games',            // Public directory for web serving
-      './installed-games',         // Alternative directory
-      'C:/Games',                  // Windows path
-      '/home/user/games'           // Linux path
-    ];
+    // For testing, we'll only check one path as requested
+    const potentialPaths = ['./games'];
     
     // Check each path in order
     for (const path of potentialPaths) {
@@ -101,10 +101,22 @@ export class Marketplace {
     // If no valid path found, try to create the games directory
     try {
       console.log("No existing installation directory found. Attempting to create one.");
-      // In a real app with Node.js access:
-      // await fs.promises.mkdir('./games', { recursive: true });
       
-      // For demo, assume we successfully created the directory
+      try {
+        // Try to use Node.js fs module
+        const fs = await import('fs').catch(() => null);
+        
+        if (fs) {
+          await fs.promises.mkdir('./games', { recursive: true });
+          console.log("Successfully created directory: ./games");
+          return './games';
+        }
+      } catch (error) {
+        console.warn("Failed to create directory using Node.js:", error);
+      }
+      
+      // Fallback for browser environments
+      console.warn("Node.js fs module not available, simulating directory creation");
       return './games';
     } catch (error) {
       console.error("Failed to create installation directory:", error);
@@ -493,6 +505,21 @@ export class Marketplace {
     ctx.fillStyle = "#cccccc";
     ctx.textAlign = "center";
     ctx.fillText(this.installStatus, width / 2, barY + barHeight + 40);
+    
+    // Check if we're in simulation mode and show a notice
+    try {
+      const fs = require('fs');
+    } catch (error) {
+      // If we can't require fs, we're in browser mode
+      ctx.font = "12px Roboto";
+      ctx.fillStyle = "#ffcc00";
+      ctx.textAlign = "center";
+      ctx.fillText(
+        "Running in simulation mode - actual installation requires Node.js",
+        width / 2,
+        height - 20
+      );
+    }
   }
 
   drawInstallCompleteScreen() {
@@ -599,23 +626,72 @@ export class Marketplace {
       await this.updateInstallProgress(0.3, "Downloading repository...", 1500);
       
       try {
-        // In a real implementation with Node.js/Electron:
-        // 1. Use git clone if git is available:
-        //    await execCommand(`git clone ${item.url} ${tempDir}`);
-        // 
-        // 2. Or use a direct download if it's a zip file:
-        //    const response = await fetch(item.url);
-        //    const blob = await response.blob();
-        //    const buffer = await blob.arrayBuffer();
-        //    await fs.promises.writeFile(`${tempDir}.zip`, Buffer.from(buffer));
-        //    await execCommand(`unzip ${tempDir}.zip -d ${tempDir}`);
-        
-        // For demo, simulate download
-        console.log(`Simulating download from: ${item.url}`);
-        
         // Check if URL is valid
         if (!item.url || !item.url.startsWith('http')) {
           throw new Error("Invalid repository URL");
+        }
+        
+        let usingNodeJs = false;
+        
+        try {
+          // Try to use Node.js modules
+          const fs = await import('fs').catch(() => null);
+          
+          if (fs) {
+            usingNodeJs = true;
+            
+            // First try git clone if it's a git repository
+            if (item.url.includes('github.com') || item.url.includes('gitlab.com')) {
+              try {
+                // Make sure temp directory doesn't exist
+                try {
+                  await execCommand(`rm -rf ${tempDir}`);
+                } catch (e) {
+                  // Ignore errors if directory doesn't exist
+                }
+                
+                await this.updateInstallProgress(0.35, "Cloning git repository...", 500);
+                await execCommand(`git clone ${item.url} ${tempDir}`);
+                console.log(`Successfully cloned repository to ${tempDir}`);
+              } catch (gitError) {
+                console.warn("Git clone failed, falling back to direct download:", gitError);
+                throw gitError; // Force fallback to direct download
+              }
+            } else {
+              throw new Error("Not a git repository URL"); // Force fallback to direct download
+            }
+          }
+        } catch (error) {
+          // If git clone failed or we're in a browser, try direct download
+          if (usingNodeJs) {
+            console.log("Falling back to direct download");
+            await this.updateInstallProgress(0.4, "Downloading zip file...", 800);
+            
+            // For Node.js, we can use fetch and fs
+            const fs = await import('fs');
+            const response = await fetch(item.url);
+            
+            if (!response.ok) {
+              throw new Error(`Failed to download: ${response.status}`);
+            }
+            
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            
+            // Create temp directory if it doesn't exist
+            await fs.promises.mkdir(tempDir, { recursive: true });
+            
+            // Write zip file
+            const zipPath = `${tempDir}.zip`;
+            await fs.promises.writeFile(zipPath, buffer);
+            
+            // Extract zip file
+            await execCommand(`unzip ${zipPath} -d ${tempDir}`);
+          } else {
+            // For browser, simulate download
+            console.log(`Simulating download from: ${item.url}`);
+            await this.updateInstallProgress(0.4, "Downloading (simulated)...", 1000);
+          }
         }
       } catch (error) {
         throw new Error(`Failed to download repository: ${error.message}`);
@@ -625,15 +701,37 @@ export class Marketplace {
       await this.updateInstallProgress(0.5, "Extracting files...", 1000);
       
       try {
-        // In a real implementation:
-        // 1. Create game directory if it doesn't exist
-        //    await fs.promises.mkdir(gameDir, { recursive: true });
-        // 
-        // 2. Copy files from temp directory to game directory
-        //    await execCommand(`cp -r ${tempDir}/* ${gameDir}/`);
+        let usingNodeJs = false;
         
-        // For demo, simulate extraction
-        console.log(`Simulating extraction to: ${gameDir}`);
+        try {
+          // Try to use Node.js modules
+          const fs = await import('fs').catch(() => null);
+          
+          if (fs) {
+            usingNodeJs = true;
+            
+            // Create game directory if it doesn't exist
+            await fs.promises.mkdir(gameDir, { recursive: true });
+            
+            // Copy files from temp directory to game directory
+            if (process.platform === 'win32') {
+              // Windows
+              await execCommand(`xcopy /E /I /Y "${tempDir}\\*" "${gameDir}"`);
+            } else {
+              // Unix-like
+              await execCommand(`cp -r ${tempDir}/* ${gameDir}/`);
+            }
+            
+            console.log(`Successfully copied files to ${gameDir}`);
+          }
+        } catch (error) {
+          if (usingNodeJs) {
+            throw error; // Re-throw if we're using Node.js but it failed
+          }
+          
+          // For browser, simulate extraction
+          console.log(`Simulating extraction to: ${gameDir}`);
+        }
       } catch (error) {
         throw new Error(`Failed to extract files: ${error.message}`);
       }
@@ -680,15 +778,50 @@ export class Marketplace {
       await this.updateInstallProgress(1.0, "Installation complete!", 500);
       
       try {
-        // In a real implementation:
-        // 1. Clean up temporary files
-        //    await execCommand(`rm -rf ${tempDir}`);
-        //    if (await fs.promises.access(`${tempDir}.zip`).then(() => true).catch(() => false)) {
-        //      await fs.promises.unlink(`${tempDir}.zip`);
-        //    }
+        let usingNodeJs = false;
         
-        // For demo, simulate cleanup
-        console.log(`Simulating cleanup of: ${tempDir}`);
+        try {
+          // Try to use Node.js modules
+          const fs = await import('fs').catch(() => null);
+          
+          if (fs) {
+            usingNodeJs = true;
+            
+            // Clean up temporary files
+            if (process.platform === 'win32') {
+              // Windows
+              await execCommand(`rmdir /S /Q "${tempDir}"`);
+              
+              // Remove zip file if it exists
+              try {
+                await fs.promises.access(`${tempDir}.zip`);
+                await fs.promises.unlink(`${tempDir}.zip`);
+              } catch (e) {
+                // Ignore if file doesn't exist
+              }
+            } else {
+              // Unix-like
+              await execCommand(`rm -rf ${tempDir}`);
+              
+              // Remove zip file if it exists
+              try {
+                await fs.promises.access(`${tempDir}.zip`);
+                await fs.promises.unlink(`${tempDir}.zip`);
+              } catch (e) {
+                // Ignore if file doesn't exist
+              }
+            }
+            
+            console.log(`Successfully cleaned up temporary files`);
+          }
+        } catch (error) {
+          if (usingNodeJs) {
+            throw error; // Re-throw if we're using Node.js but it failed
+          }
+          
+          // For browser, simulate cleanup
+          console.log(`Simulating cleanup of: ${tempDir}`);
+        }
       } catch (error) {
         // Non-critical error - log but continue
         console.warn(`Warning: Failed to clean up temporary files: ${error.message}`);
