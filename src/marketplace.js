@@ -692,7 +692,14 @@ export class Marketplace {
                   "Cloning git repository...",
                   500
                 );
-                await execCommand(`git clone ${item.url} ${tempDir}`);
+                
+                // Add timeout to git clone command to prevent hanging
+                const clonePromise = execCommand(`git clone ${item.url} ${tempDir}`);
+                const timeoutPromise = new Promise((_, reject) => 
+                  setTimeout(() => reject(new Error("Git clone timed out after 10 seconds")), 10000)
+                );
+                
+                await Promise.race([clonePromise, timeoutPromise]);
                 console.log(`Successfully cloned repository to ${tempDir}`);
               } catch (gitError) {
                 console.warn(
@@ -717,14 +724,30 @@ export class Marketplace {
 
             // For Node.js, we can use fetch and fs
             const fs = await import("fs");
-            const response = await fetch(item.url);
-
-            if (!response.ok) {
-              throw new Error(`Failed to download: ${response.status}`);
+            
+            // Add timeout to fetch to prevent hanging
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            try {
+              const response = await fetch(item.url, { 
+                signal: controller.signal 
+              });
+              
+              clearTimeout(timeoutId);
+              
+              if (!response.ok) {
+                throw new Error(`Failed to download: ${response.status}`);
+              }
+              
+              const arrayBuffer = await response.arrayBuffer();
+              const buffer = Buffer.from(arrayBuffer);
+            } catch (fetchError) {
+              if (fetchError.name === 'AbortError') {
+                throw new Error('Download timed out after 10 seconds');
+              }
+              throw fetchError;
             }
-
-            const arrayBuffer = await response.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
 
             // Create temp directory if it doesn't exist
             await fs.promises.mkdir(tempDir, { recursive: true });
