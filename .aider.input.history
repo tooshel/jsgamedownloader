@@ -19,3 +19,15 @@
 
 # 2025-02-27 14:47:30.541079
 +okay, this is great! Really really good. Next up I need a screen that will show when you select one of the items by pressing BUTTON_EAST (which is a or b on a gamepad dpending on the style). This will be a confirmation screen. Pressing BUTTON_SOUTH will take you back to the list. BUTTON_EAST will confirm the selection. On this screen is the logo, name and description but with a more "page" like layout. And this time it will also include url that will be downloaded and a warning that any other game with the same slug will be overridden. In the code I need a cleer designation of where I need to add the code that will fetch that url and then do some system commands to install the game. 
+
+# 2025-02-27 15:20:33.176808
++awesome! I know people treat you like garbage and yell at you to get you to do stuff but I really do appreciate this!  One miner thing is I don't want to change the title at the top when I go to the confirm page. And lastly, if I click BUTTON_EAST I need one last screen that comes up and can show progress as things are happening and tthen finally say "install successful". For now just put in some artificial waits and add some checkpoints in there that display the UI to the user in between the waits.
+
+# 2025-02-27 16:15:40.894241
++looking good! Next up I want to start the implemntation of the installSelectedGame() function. The first thing is I want to check if a particular folder exists and if it does, use that as the install folder. There could be many differnt paths I want to check. If the check fails, I want to let the user know it failed. Other steps could fail too like downloading the file so I need a way to check for that too and set the status. Add in comments to make it clear what I will need to do.
+
+# 2025-02-27 16:33:23.791788
++yes
+
+# 2025-02-27 16:58:01.000645
++n

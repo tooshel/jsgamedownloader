@@ -48,12 +48,13 @@ export function loadImage(src) {
 export function loadFont(fontFamily, url) {
   return new Promise((resolve, reject) => {
     const fontFace = new FontFace(fontFamily, `url(${url})`);
-    fontFace.load()
-      .then(loadedFace => {
+    fontFace
+      .load()
+      .then((loadedFace) => {
         document.fonts.add(loadedFace);
         resolve(fontFamily);
       })
-      .catch(err => reject(err));
+      .catch((err) => reject(err));
   });
 }
 
@@ -98,10 +99,16 @@ export function createResourceLoader() {
       return promise;
     },
     getPercentComplete() {
-      return (this.imgLoadedCount + this.soundLoadedCount) / (this.imgCount + this.soundCount);
+      return (
+        (this.imgLoadedCount + this.soundLoadedCount) /
+        (this.imgCount + this.soundCount)
+      );
     },
     isComplete() {
-      return this.imgLoadedCount === this.imgCount && this.soundLoadedCount === this.soundCount;
+      return (
+        this.imgLoadedCount === this.imgCount &&
+        this.soundLoadedCount === this.soundCount
+      );
     },
     load() {
       return Promise.all([...this.imagePromises, ...this.soundPromises]);
@@ -117,7 +124,12 @@ export function createResourceLoader() {
   };
 }
 
-export function drawLoadingScreen(ctx, percentComplete, backgroundColor = 'black', foregroundColor = 'white') {
+export function drawLoadingScreen(
+  ctx,
+  percentComplete,
+  backgroundColor = "black",
+  foregroundColor = "white"
+) {
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
   const fontSize = height * 0.1;
@@ -126,15 +138,29 @@ export function drawLoadingScreen(ctx, percentComplete, backgroundColor = 'black
   ctx.fillStyle = foregroundColor;
   ctx.font = `${fontSize}px monospace`;
   // draw loading text in center of screen
-  ctx.fillText('Loading...', width / 2 - ctx.measureText('Loading...').width / 2, height / 2);
+  ctx.fillText(
+    "Loading...",
+    width / 2 - ctx.measureText("Loading...").width / 2,
+    height / 2
+  );
   const loadingBarWidth = width * 0.8;
   const loadingBarCompletedWidth = loadingBarWidth * percentComplete;
   const loadingBarHeight = height * 0.1;
   ctx.fillStyle = foregroundColor;
   ctx.strokeStyle = foregroundColor;
   ctx.lineWidth = height * 0.01;
-  ctx.fillRect(width / 2 - loadingBarWidth / 2, height / 2 - loadingBarHeight / 2 + fontSize, loadingBarCompletedWidth, loadingBarHeight);
-  ctx.strokeRect(width / 2 - loadingBarWidth / 2, height / 2 - loadingBarHeight / 2 + fontSize, loadingBarWidth, loadingBarHeight);
+  // ctx.fillRect(
+  //   width / 2 - loadingBarWidth / 2,
+  //   height / 2 - loadingBarHeight / 2 + fontSize,
+  //   loadingBarCompletedWidth,
+  //   loadingBarHeight
+  // );
+  // ctx.strokeRect(
+  //   width / 2 - loadingBarWidth / 2,
+  //   height / 2 - loadingBarHeight / 2 + fontSize,
+  //   loadingBarWidth,
+  //   loadingBarHeight
+  // );
 }
 
 /**
@@ -144,7 +170,7 @@ export function drawLoadingScreen(ctx, percentComplete, backgroundColor = 'black
  */
 export async function execCommand(command) {
   console.log(`Executing command: ${command}`);
-  
+
   // In a browser environment, we can't directly execute shell commands
   // In a real implementation with Node.js/Electron, you would use:
   // const { exec } = require('child_process');
@@ -157,13 +183,13 @@ export async function execCommand(command) {
   //     resolve(stdout);
   //   });
   // });
-  
+
   // Placeholder implementation - simulate command execution
   return new Promise((resolve, reject) => {
     // Simulate command execution time
     setTimeout(() => {
       // Simulate success or failure based on command
-      if (command.includes('invalid')) {
+      if (command.includes("invalid")) {
         reject(new Error(`Command failed: ${command}`));
       } else {
         resolve(`Command executed successfully: ${command}`);
@@ -180,12 +206,12 @@ function getDefaultBtn() {
 }
 
 const keys = {};
-window.addEventListener('keydown', (e) => {
+window.addEventListener("keydown", (e) => {
   keys[e.key] = keys[e.key] || getDefaultBtn();
   keys[e.key].pressed = true;
   keys[e.key].value = 1;
 });
-window.addEventListener('keyup', (e) => {
+window.addEventListener("keyup", (e) => {
   keys[e.key] = keys[e.key] || getDefaultBtn();
   keys[e.key].pressed = false;
   keys[e.key].value = 0;
@@ -200,7 +226,7 @@ export function getInput() {
   gamepads.forEach((gp) => {
     if (gp) {
       const player = {
-        type: 'gp',
+        type: "gp",
         name: gp.id,
         DPAD_UP: gp.buttons[12],
         DPAD_DOWN: gp.buttons[13],
@@ -228,25 +254,25 @@ export function getInput() {
     }
   });
   players.push({
-    type: 'keyboard',
-    name: 'keyboard',
-    DPAD_UP: keys['ArrowUp'] || getDefaultBtn(),
-    DPAD_DOWN: keys['ArrowDown'] || getDefaultBtn(),
-    DPAD_LEFT: keys['ArrowLeft'] || getDefaultBtn(),
-    DPAD_RIGHT: keys['ArrowRight'] || getDefaultBtn(),
-    BUTTON_SOUTH: keys['z'] || getDefaultBtn(),
-    BUTTON_EAST: keys['x'] || getDefaultBtn(),
-    BUTTON_WEST: keys['a'] || getDefaultBtn(),
-    BUTTON_NORTH: keys['s'] || getDefaultBtn(),
-    LEFT_SHOULDER: keys['q'] || getDefaultBtn(),
-    RIGHT_SHOULDER: keys['r'] || getDefaultBtn(),
-    LEFT_TRIGGER: keys['e'] || getDefaultBtn(),
-    RIGHT_TRIGGER: keys['r'] || getDefaultBtn(),
-    SELECT: keys['Shift'] || getDefaultBtn(),
-    START: keys['Enter'] || getDefaultBtn(),
-    GUIDE: keys['Escape'] || getDefaultBtn(),
-    LEFT_STICK: keys['c'] || getDefaultBtn(),
-    RIGHT_STICK: keys['v'] || getDefaultBtn(),
+    type: "keyboard",
+    name: "keyboard",
+    DPAD_UP: keys["ArrowUp"] || getDefaultBtn(),
+    DPAD_DOWN: keys["ArrowDown"] || getDefaultBtn(),
+    DPAD_LEFT: keys["ArrowLeft"] || getDefaultBtn(),
+    DPAD_RIGHT: keys["ArrowRight"] || getDefaultBtn(),
+    BUTTON_SOUTH: keys["z"] || getDefaultBtn(),
+    BUTTON_EAST: keys["x"] || getDefaultBtn(),
+    BUTTON_WEST: keys["a"] || getDefaultBtn(),
+    BUTTON_NORTH: keys["s"] || getDefaultBtn(),
+    LEFT_SHOULDER: keys["q"] || getDefaultBtn(),
+    RIGHT_SHOULDER: keys["r"] || getDefaultBtn(),
+    LEFT_TRIGGER: keys["e"] || getDefaultBtn(),
+    RIGHT_TRIGGER: keys["r"] || getDefaultBtn(),
+    SELECT: keys["Shift"] || getDefaultBtn(),
+    START: keys["Enter"] || getDefaultBtn(),
+    GUIDE: keys["Escape"] || getDefaultBtn(),
+    LEFT_STICK: keys["c"] || getDefaultBtn(),
+    RIGHT_STICK: keys["v"] || getDefaultBtn(),
     LEFT_STICK_X: 0,
     LEFT_STICK_Y: 0,
     RIGHT_STICK_X: 0,
