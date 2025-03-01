@@ -33,7 +33,9 @@ export class Marketplace {
 
   async getFolders(directory) {
     try {
-      const entries = await fs.readdir(directory, { withFileTypes: true });
+      const fs = await import('fs').catch(() => null);
+      const entries = await fs.promises.readdir(directory, { withFileTypes: true });
+      console.log('Entries JASON', entries, directory);
       return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
     } catch (error) {
       console.error('Error reading directory:', error);
