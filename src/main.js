@@ -1,8 +1,8 @@
-import { loadSound, getInput } from "./utils.js";
-import { Marketplace } from "./marketplace.js";
+import { loadSound, getInput } from './utils.js';
+import { Marketplace } from './marketplace.js';
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
 const { width, height } = canvas;
 let lastTime;
@@ -30,12 +30,7 @@ function update(elapsedTime) {
   // Add cooldown for input to prevent too rapid actions
   const now = performance.now();
   if (now - inputState.lastDpadPress > inputState.dpadCooldown) {
-    if (
-      p1.DPAD_UP.pressed ||
-      p1.DPAD_DOWN.pressed ||
-      p1.BUTTON_EAST.pressed ||
-      p1.BUTTON_SOUTH.pressed
-    ) {
+    if (p1.DPAD_UP.pressed || p1.DPAD_DOWN.pressed || p1.BUTTON_EAST.pressed || p1.BUTTON_SOUTH.pressed) {
       inputState.lastDpadPress = now;
       marketplace.update(p1);
     }
@@ -63,10 +58,11 @@ async function launch() {
   gameLoop();
 
   // Load sound effect
-  laserSound = await loadSound("sounds/laser.mp3");
+  laserSound = await loadSound('sounds/laser.mp3');
 
   // Fetch marketplace items from our sample data
-  await marketplace.fetchItems("./registry.json");
+  // await marketplace.fetchItems("./registry.json");
+  await marketplace.fetchItems('./sample-data.json');
 }
 
 // Helper function to play sound (moved from utils import)
