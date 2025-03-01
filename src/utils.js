@@ -99,16 +99,10 @@ export function createResourceLoader() {
       return promise;
     },
     getPercentComplete() {
-      return (
-        (this.imgLoadedCount + this.soundLoadedCount) /
-        (this.imgCount + this.soundCount)
-      );
+      return (this.imgLoadedCount + this.soundLoadedCount) / (this.imgCount + this.soundCount);
     },
     isComplete() {
-      return (
-        this.imgLoadedCount === this.imgCount &&
-        this.soundLoadedCount === this.soundCount
-      );
+      return this.imgLoadedCount === this.imgCount && this.soundLoadedCount === this.soundCount;
     },
     load() {
       return Promise.all([...this.imagePromises, ...this.soundPromises]);
@@ -124,12 +118,7 @@ export function createResourceLoader() {
   };
 }
 
-export function drawLoadingScreen(
-  ctx,
-  percentComplete,
-  backgroundColor = "black",
-  foregroundColor = "white"
-) {
+export function drawLoadingScreen(ctx, percentComplete, backgroundColor = 'black', foregroundColor = 'white') {
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
   const fontSize = height * 0.1;
@@ -138,11 +127,7 @@ export function drawLoadingScreen(
   ctx.fillStyle = foregroundColor;
   ctx.font = `${fontSize}px monospace`;
   // draw loading text in center of screen
-  ctx.fillText(
-    "Loading...",
-    width / 2 - ctx.measureText("Loading...").width / 2,
-    height / 2
-  );
+  ctx.fillText('Loading...', width / 2 - ctx.measureText('Loading...').width / 2, height / 2);
   const loadingBarWidth = width * 0.8;
   const loadingBarCompletedWidth = loadingBarWidth * percentComplete;
   const loadingBarHeight = height * 0.1;
@@ -174,10 +159,11 @@ export async function execCommand(command) {
   try {
     // Try to use Node.js child_process
     const { exec } = await import('child_process').catch(() => ({}));
-    
+
     if (exec) {
       return new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
+          console.log('command, stdout', command, stdout);
           if (error) {
             reject(new Error(`Command failed: ${error.message}`));
             return;
@@ -186,13 +172,13 @@ export async function execCommand(command) {
         });
       });
     } else {
-      console.warn("Node.js child_process module not available, simulating command execution");
+      console.warn('Node.js child_process module not available, simulating command execution');
       // Fallback to simulation for browser environments
       return new Promise((resolve, reject) => {
         // Simulate command execution time
         setTimeout(() => {
           // Simulate success or failure based on command
-          if (command.includes("invalid")) {
+          if (command.includes('invalid')) {
             reject(new Error(`Command failed: ${command}`));
           } else {
             resolve(`Command executed successfully: ${command}`);
@@ -201,7 +187,7 @@ export async function execCommand(command) {
       });
     }
   } catch (error) {
-    console.error("Error executing command:", error);
+    console.error('Error executing command:', error);
     throw error;
   }
 }
@@ -214,12 +200,12 @@ function getDefaultBtn() {
 }
 
 const keys = {};
-window.addEventListener("keydown", (e) => {
+window.addEventListener('keydown', (e) => {
   keys[e.key] = keys[e.key] || getDefaultBtn();
   keys[e.key].pressed = true;
   keys[e.key].value = 1;
 });
-window.addEventListener("keyup", (e) => {
+window.addEventListener('keyup', (e) => {
   keys[e.key] = keys[e.key] || getDefaultBtn();
   keys[e.key].pressed = false;
   keys[e.key].value = 0;
@@ -234,7 +220,7 @@ export function getInput() {
   gamepads.forEach((gp) => {
     if (gp) {
       const player = {
-        type: "gp",
+        type: 'gp',
         name: gp.id,
         DPAD_UP: gp.buttons[12],
         DPAD_DOWN: gp.buttons[13],
@@ -262,25 +248,25 @@ export function getInput() {
     }
   });
   players.push({
-    type: "keyboard",
-    name: "keyboard",
-    DPAD_UP: keys["ArrowUp"] || getDefaultBtn(),
-    DPAD_DOWN: keys["ArrowDown"] || getDefaultBtn(),
-    DPAD_LEFT: keys["ArrowLeft"] || getDefaultBtn(),
-    DPAD_RIGHT: keys["ArrowRight"] || getDefaultBtn(),
-    BUTTON_SOUTH: keys["z"] || getDefaultBtn(),
-    BUTTON_EAST: keys["x"] || getDefaultBtn(),
-    BUTTON_WEST: keys["a"] || getDefaultBtn(),
-    BUTTON_NORTH: keys["s"] || getDefaultBtn(),
-    LEFT_SHOULDER: keys["q"] || getDefaultBtn(),
-    RIGHT_SHOULDER: keys["r"] || getDefaultBtn(),
-    LEFT_TRIGGER: keys["e"] || getDefaultBtn(),
-    RIGHT_TRIGGER: keys["r"] || getDefaultBtn(),
-    SELECT: keys["Shift"] || getDefaultBtn(),
-    START: keys["Enter"] || getDefaultBtn(),
-    GUIDE: keys["Escape"] || getDefaultBtn(),
-    LEFT_STICK: keys["c"] || getDefaultBtn(),
-    RIGHT_STICK: keys["v"] || getDefaultBtn(),
+    type: 'keyboard',
+    name: 'keyboard',
+    DPAD_UP: keys['ArrowUp'] || getDefaultBtn(),
+    DPAD_DOWN: keys['ArrowDown'] || getDefaultBtn(),
+    DPAD_LEFT: keys['ArrowLeft'] || getDefaultBtn(),
+    DPAD_RIGHT: keys['ArrowRight'] || getDefaultBtn(),
+    BUTTON_SOUTH: keys['z'] || getDefaultBtn(),
+    BUTTON_EAST: keys['x'] || getDefaultBtn(),
+    BUTTON_WEST: keys['a'] || getDefaultBtn(),
+    BUTTON_NORTH: keys['s'] || getDefaultBtn(),
+    LEFT_SHOULDER: keys['q'] || getDefaultBtn(),
+    RIGHT_SHOULDER: keys['r'] || getDefaultBtn(),
+    LEFT_TRIGGER: keys['e'] || getDefaultBtn(),
+    RIGHT_TRIGGER: keys['r'] || getDefaultBtn(),
+    SELECT: keys['Shift'] || getDefaultBtn(),
+    START: keys['Enter'] || getDefaultBtn(),
+    GUIDE: keys['Escape'] || getDefaultBtn(),
+    LEFT_STICK: keys['c'] || getDefaultBtn(),
+    RIGHT_STICK: keys['v'] || getDefaultBtn(),
     LEFT_STICK_X: 0,
     LEFT_STICK_Y: 0,
     RIGHT_STICK_X: 0,

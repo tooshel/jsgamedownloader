@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Slide Game",
+    "description": "Luis's presentation from halfstack 2025!",
+    "icon": "images/js.png",
+    "url": "https://github.com/tooshel/slidegame/archive/refs/heads/main.zip"
+  },
+  {
+    "name": "Space Shooter",
+    "description": "Classic arcade-style space shooter game",
+    "icon": "images/js.png",
+    "url": "https://github.com/example/space-shooter"
+  }
+]

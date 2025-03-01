@@ -37,3 +37,12 @@
 
 # 2025-02-27 17:41:07.045510
 +n
+
+# 2025-02-28 09:47:44.517493
++no
+
+# 2025-02-28 09:48:28.432995
++on my pc, the step for "download from github" would fail . . and it should fail since there is nothing at that URL. but on my mac, that's not failing and it's hanging on that step
+
+# 2025-02-28 09:48:36.784834
++yes

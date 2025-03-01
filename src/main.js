@@ -66,7 +66,7 @@ async function launch() {
   laserSound = await loadSound("sounds/laser.mp3");
 
   // Fetch marketplace items from our sample data
-  await marketplace.fetchItems("./sample-data.json");
+  await marketplace.fetchItems("./registry.json");
 }
 
 // Helper function to play sound (moved from utils import)
