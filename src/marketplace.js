@@ -433,11 +433,15 @@ export class Marketplace {
     // Check if we're in simulation mode and show a notice
 
     if (globalThis._jsg) {
-      // console.log("REAL Mode", globalThis._jsg);
+      // console.log(`REAL Mode ROMDIR: ${globalThis._jsg.rom.romDir.substring(0, globalThis._jsg.rom.romDir.lastIndexOf('/'))}`);
       ctx.font = '12px Roboto';
       ctx.fillStyle = '#ffcc00';
       ctx.textAlign = 'center';
-      ctx.fillText(`REAL Mode: ${globalThis._jsg.rom}`, width / 2, height - 20);
+      ctx.fillText(
+        `REAL Mode ROMDIR: ${globalThis._jsg.rom.romDir.substring(0, globalThis._jsg.rom.romDir.lastIndexOf('/'))}`,
+        width / 2,
+        height - 20
+      );
     } else {
       ctx.font = '12px Roboto';
       ctx.fillStyle = '#ffcc00';
@@ -513,10 +517,18 @@ export class Marketplace {
     try {
       // Step 1: Start
       await this.updateInstallProgress(0.05, 'Starting installation...', 500);
-      const installDir = '../';
 
+      console.log('ROMDIR', globalThis._jsg.rom.romDir.substring(0, globalThis._jsg.rom.romDir.lastIndexOf('/')));
+      let installDir = '../';
+
+      if (globalThis._jsg) {
+        installDir = globalThis._jsg.rom.romDir.substring(0, globalThis._jsg.rom.romDir.lastIndexOf('/')) + '/';
+      }
+      console.log('installDir', installDir);
+
+      // This will never throw but it's an example of how to get an error to pop up
       if (!installDir) {
-        throw new Error("No valid installation directory found. Please create a 'games' folder.");
+        throw new Error("No valid installation directory found. Please create a 'jsgames' folder.");
       }
 
       // Step 2: Prepare installation
@@ -585,7 +597,9 @@ export class Marketplace {
                   setTimeout(() => reject(new Error('Git clone timed out after 50 seconds')), 50000)
                 );
 
-                await Promise.race([clonePromise], [timeoutPromise]);
+                // The timeoutPromise is crashing the game and needs to be rethought
+                // await Promise.race([clonePromise], [timeoutPromise]);
+                await Promise.race([clonePromise]);
 
                 console.log(`Successfully downloaded zip to ${zipFile}`);
               } catch (gitError) {
@@ -681,7 +695,7 @@ export class Marketplace {
             console.log(`extractFolder tempdir ${extractFolder}  ${tempDir}`);
             console.log(`extractFolder tempdir ${extractFolder} ${extractFolder[0]}  ${tempDir}`);
 
-            await execCommand(`mv ${tempDir}/${extractFolder}/* ${gameDir}`);
+            await execCommand(`mv -f ${tempDir}/${extractFolder}/* ${gameDir}`);
             console.log(`Hopefully successfully copied ${extractFolder} to ${gameDir}`);
             await execCommand(`rm -rf ${tempDir}`);
             console.log(`Hopefully sucessfully removed ${tempDir}`);
