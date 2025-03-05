@@ -17,7 +17,7 @@
     "name": "Slide Game",
     "description": "Luis's presentation from halfstack 2025 Hash!",
     "icon": "images/js.png",
-    "tags": ["game-jam-2025-01", "app"],
+    "tags": ["app"],
     "url": "https://github.com/tooshel/slidegame/archive/refs/heads/e152f6e5a6a54ae7b19b612215f8ae38c02774cb.zip"
   }
 ]
