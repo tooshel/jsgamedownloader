@@ -1,14 +1,23 @@
 [
   {
+    "name": "Game Jam 2048",
+    "description": "2048 from the game jam!",
+    "icon": "images/js.png",
+    "tags": ["game-jam-2025-01", "puzzle"],
+    "url": "https://github.com/malakada/game-jam-2048/archive/refs/heads/main.zip"
+  },
+  {
+    "name": "Tap Battle",
+    "description": "Multiplayer who can tap fastest!",
+    "icon": "images/js.png",
+    "tags": ["game-jam-2025-01", "action"],
+    "url": "https://github.com/jtdevos/tapper/archive/refs/heads/main.zip"
+  },
+  {
     "name": "Slide Game",
     "description": "Luis's presentation from halfstack 2025!",
     "icon": "images/js.png",
+    "tags": ["game-jam-2025-01", "app"],
     "url": "https://github.com/tooshel/slidegame/archive/refs/heads/main.zip"
-  },
-  {
-    "name": "Broken URL Space Shooter",
-    "description": "Classic arcade-style space shooter game",
-    "icon": "images/js.png",
-    "url": "https://github.com/example/space-shooter"
   }
 ]

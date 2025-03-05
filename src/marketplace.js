@@ -304,7 +304,7 @@ export class Marketplace {
     ctx.font = '14px Roboto, NotoEmoji';
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
-    ctx.fillText('Use ⬆️/⬇️ to navigate, 🅱️ to select', width / 2, height - 10);
+    ctx.fillText('Use ⬆️/⬇️ to navigate, 🅰️ to select', width / 2, height - 10);
   }
 
   drawConfirmationScreen() {
@@ -382,13 +382,13 @@ export class Marketplace {
     ctx.font = '16px Roboto, NotoEmoji';
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
-    ctx.fillText('Cancel (🅰️)', width / 2 - buttonWidth / 2 - buttonPadding, buttonY + buttonHeight / 2 + 5);
+    ctx.fillText('Cancel (🅱️)', width / 2 - buttonWidth / 2 - buttonPadding, buttonY + buttonHeight / 2 + 5);
 
     // Confirm button
     ctx.fillStyle = '#e94560';
     ctx.fillRect(width / 2 + buttonPadding, buttonY, buttonWidth, buttonHeight);
     ctx.fillStyle = 'white';
-    ctx.fillText('Install (🅱️)', width / 2 + buttonWidth / 2 + buttonPadding, buttonY + buttonHeight / 2 + 5);
+    ctx.fillText('Install (🅰️)', width / 2 + buttonWidth / 2 + buttonPadding, buttonY + buttonHeight / 2 + 5);
   }
 
   drawInstallationScreen() {
@@ -482,7 +482,11 @@ export class Marketplace {
     ctx.fillText(`${item.name} has been installed successfully.`, width / 2, contentY + 120);
 
     // Draw installation path
-    const gameSlug = item.name.toLowerCase().replace(/\s+/g, '-');
+    const gameSlug = item.name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-');
     ctx.font = '16px Roboto';
     ctx.fillStyle = '#e94560';
     ctx.textAlign = 'center';
@@ -536,7 +540,11 @@ export class Marketplace {
 
       // Create a slug from the game name for the folder name
       const randomString = Math.random().toString(36).substring(2, 15);
-      const gameSlug = item.name.toLowerCase().replace(/\s+/g, '-');
+      const gameSlug = item.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-');
       const gameDir = `${installDir}${gameSlug}`;
       const tempDir = `./temp-${randomString}`;
       const zipFile = `new-${gameSlug}.zip`;
@@ -592,15 +600,15 @@ export class Marketplace {
                 // Add timeout to git clone command to prevent hanging
 
                 console.log('Running curl: ', `curl -o ${tempDir}/${zipFile} -L "${item.url}" `);
+                let timeoutId;
                 const clonePromise = execCommand(`curl -o ${tempDir}/${zipFile} -L "${item.url}" `);
-                const timeoutPromise = new Promise((_, reject) =>
-                  setTimeout(() => reject(new Error('Git clone timed out after 50 seconds')), 50000)
+                const timeoutPromise = new Promise(
+                  (_, reject) => (timeoutId = setTimeout(() => reject(new Error('Git clone timed out after 50 seconds')), 50000))
                 );
 
                 // The timeoutPromise is crashing the game and needs to be rethought
-                // await Promise.race([clonePromise], [timeoutPromise]);
-                await Promise.race([clonePromise]);
-
+                await Promise.race([clonePromise], [timeoutPromise]);
+                clearTimeout(timeoutId);
                 console.log(`Successfully downloaded zip to ${zipFile}`);
               } catch (gitError) {
                 console.warn('Git clone failed, falling back to direct download:', gitError);
@@ -677,6 +685,8 @@ export class Marketplace {
 
             // Create game directory if it doesn't exist
 
+            //delete the old game if it's there
+            await execCommand(`rm -rf ${gameDir}`);
             console.log('Creating game directory:', gameDir);
             await fs.promises.mkdir(gameDir, { recursive: true });
 
@@ -692,8 +702,8 @@ export class Marketplace {
 
             extractFolder = await this.getFolders(`${tempDir}`);
 
-            console.log(`extractFolder tempdir ${extractFolder}  ${tempDir}`);
-            console.log(`extractFolder tempdir ${extractFolder} ${extractFolder[0]}  ${tempDir}`);
+            // console.log(`extractFolder tempdir ${extractFolder}  ${tempDir}`);
+            // console.log(`extractFolder tempdir ${extractFolder} ${extractFolder[0]}  ${tempDir}`);
 
             await execCommand(`mv -f ${tempDir}/${extractFolder}/* ${gameDir}`);
             console.log(`Hopefully successfully copied ${extractFolder} to ${gameDir}`);
@@ -867,13 +877,13 @@ export class Marketplace {
     ctx.font = '16px Roboto, NotoEmoji';
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
-    ctx.fillText('Cancel (🅰️)', width / 2 - buttonWidth / 2 - buttonPadding, buttonY + buttonHeight / 2 + 5);
+    ctx.fillText('Cancel (🅱️)', width / 2 - buttonWidth / 2 - buttonPadding, buttonY + buttonHeight / 2 + 5);
 
     // Retry button
     ctx.fillStyle = '#e94560';
     ctx.fillRect(width / 2 + buttonPadding, buttonY, buttonWidth, buttonHeight);
     ctx.fillStyle = 'white';
-    ctx.fillText('Retry (🅱️)', width / 2 + buttonWidth / 2 + buttonPadding, buttonY + buttonHeight / 2 + 5);
+    ctx.fillText('Retry (🅰️)', width / 2 + buttonWidth / 2 + buttonPadding, buttonY + buttonHeight / 2 + 5);
   }
 
   updateInstallProgress(progress, status, delay) {
