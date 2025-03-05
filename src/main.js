@@ -60,9 +60,23 @@ async function launch() {
   // Load sound effect
   laserSound = await loadSound('sounds/laser.mp3');
 
-  // Fetch marketplace items from our sample data
-  // await marketplace.fetchItems('./sample-data.json');
-  await marketplace.fetchItems('./registry.json');
+  // Fetch marketplace items from GitHub first, with fallback to local file
+  try {
+    // Set a timeout of 4 seconds for the remote fetch
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    
+    // Replace this URL with your actual GitHub registry URL when you have it
+    const githubUrl = 'https://raw.githubusercontent.com/knulli/jsgames-registry/main/registry.json';
+    
+    await marketplace.fetchItems(githubUrl, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    console.log('Successfully loaded registry from GitHub');
+  } catch (error) {
+    console.warn('Failed to fetch from GitHub, falling back to local registry:', error);
+    // Fallback to local registry
+    await marketplace.fetchItems('./registry.json');
+  }
 }
 
 // Helper function to play sound (moved from utils import)

@@ -94,13 +94,13 @@ export class Marketplace {
     }
   }
 
-  async fetchItems(url) {
+  async fetchItems(url, options = {}) {
     this.loading = true;
     try {
       // Make sure fonts are loaded first
       await this.loadFonts();
 
-      const response = await fetch(url);
+      const response = await fetch(url, options);
       if (!response.ok) {
         throw new Error(`Failed to fetch: ${response.status}`);
       }
@@ -117,6 +117,7 @@ export class Marketplace {
       console.error('Error fetching marketplace items:', error);
       this.items = [];
       this.loading = false;
+      throw error; // Re-throw to allow fallback in the calling code
     }
   }
 
