@@ -4,20 +4,20 @@
     "description": "2048 from the game jam!",
     "icon": "images/js.png",
     "tags": ["game-jam-2025-01", "puzzle"],
-    "url": "https://github.com/malakada/game-jam-2048/archive/refs/heads/main.zip"
+    "url": "https://github.com/malakada/game-jam-2048/archive/refs/heads/4ff3e374777f15db53ac23398a47e780cdd17bcf.zip"
   },
   {
     "name": "Tap Battle",
     "description": "Multiplayer who can tap fastest!",
     "icon": "images/js.png",
     "tags": ["game-jam-2025-01", "action"],
-    "url": "https://github.com/jtdevos/tapper/archive/refs/heads/main.zip"
+    "url": "https://github.com/jtdevos/tapper/archive/refs/heads/988d8c5466f0b934c3e1f4eedb394d44bd220792.zip"
   },
   {
     "name": "Slide Game",
-    "description": "Luis's presentation from halfstack 2025!",
+    "description": "Luis's presentation from halfstack 2025 Hash!",
     "icon": "images/js.png",
     "tags": ["game-jam-2025-01", "app"],
-    "url": "https://github.com/tooshel/slidegame/archive/refs/heads/main.zip"
+    "url": "https://github.com/tooshel/slidegame/archive/refs/heads/e152f6e5a6a54ae7b19b612215f8ae38c02774cb.zip"
   }
 ]
