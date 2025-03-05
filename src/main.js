@@ -65,10 +65,10 @@ async function launch() {
     // Set a timeout of 4 seconds for the remote fetch
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
-    
+
     // Replace this URL with your actual GitHub registry URL when you have it
-    const githubUrl = 'https://raw.githubusercontent.com/knulli/jsgames-registry/main/registry.json';
-    
+    const githubUrl = 'https://raw.githubusercontent.com/tooshel/jsgamedownloader/main/public/registry.json';
+
     await marketplace.fetchItems(githubUrl, { signal: controller.signal });
     clearTimeout(timeoutId);
     console.log('Successfully loaded registry from GitHub');

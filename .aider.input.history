@@ -64,3 +64,6 @@
 
 # 2025-03-04 18:03:24.843116
 +in line 380 you will see this    ctx.fillText(`Repository: ${item.url}`, width / 2, urlY); and that url is really long. I need to take off the hash and .zip at the end and add a line with the hash and show the more truncaked url. Can you do that?
+
+# 2025-03-04 18:12:37.899843
++on line 65 in src/main.js, you can see the app is fetching a local file. I want that to be a fallback after 4 seconds if a fetch to a file in github fails. I will specify that url later. 
