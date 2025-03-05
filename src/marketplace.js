@@ -377,7 +377,38 @@ export class Marketplace {
     const urlY = lineY + 40;
     ctx.font = '14px Roboto';
     ctx.fillStyle = '#e94560';
-    ctx.fillText(`Repository: ${item.url}`, width / 2, urlY);
+    
+    // Process URL to remove hash and .zip
+    let displayUrl = item.url;
+    let hash = '';
+    
+    // Extract hash if present
+    if (displayUrl.includes('/archive/')) {
+      const parts = displayUrl.split('/archive/');
+      displayUrl = parts[0];
+      if (parts[1] && parts[1].includes('.zip')) {
+        hash = parts[1].replace('.zip', '');
+      }
+    } else if (displayUrl.includes('/zipball/')) {
+      const parts = displayUrl.split('/zipball/');
+      displayUrl = parts[0];
+      if (parts[1]) {
+        hash = parts[1];
+      }
+    }
+    
+    // Truncate URL if too long
+    if (displayUrl.length > 50) {
+      displayUrl = displayUrl.substring(0, 47) + '...';
+    }
+    
+    // Display URL and hash on separate lines
+    ctx.fillText(`Repository: ${displayUrl}`, width / 2, urlY);
+    
+    // Display hash if available
+    if (hash) {
+      ctx.fillText(`Version: ${hash}`, width / 2, urlY + 25);
+    }
 
     // Draw warning
     const warningY = urlY + 30;
