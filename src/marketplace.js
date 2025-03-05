@@ -281,19 +281,19 @@ export class Marketplace {
       }
 
       ctx.fillText(description, textX, y + DESCRIPTION_OFFSET + 15);
-      
+
       // Draw tags if available
       if (item.tags && item.tags.length > 0) {
         const tagY = y + DESCRIPTION_OFFSET + 35;
         ctx.font = '12px Roboto';
         ctx.fillStyle = isSelected ? '#f8d7da' : '#e94560';
-        
+
         // Join tags with bullet points and truncate if too long
         let tagsText = item.tags.join(' • ');
         if (tagsText.length > 60) {
           tagsText = tagsText.substring(0, 57) + '...';
         }
-        
+
         ctx.fillText(tagsText, textX, tagY);
       }
     }
@@ -377,11 +377,11 @@ export class Marketplace {
     const urlY = lineY + 40;
     ctx.font = '14px Roboto';
     ctx.fillStyle = '#e94560';
-    
+
     // Process URL to remove hash and .zip
     let displayUrl = item.url;
     let hash = '';
-    
+
     // Extract hash if present
     if (displayUrl.includes('/archive/')) {
       const parts = displayUrl.split('/archive/');
@@ -396,24 +396,24 @@ export class Marketplace {
         hash = parts[1];
       }
     }
-    
+
     // Truncate URL if too long
     if (displayUrl.length > 50) {
       displayUrl = displayUrl.substring(0, 47) + '...';
     }
-    
+
     // Display URL and hash on separate lines
     ctx.fillText(`Repository: ${displayUrl}`, width / 2, urlY);
-    
+
     // Display hash if available
     if (hash) {
       ctx.fillText(`Version: ${hash}`, width / 2, urlY + 25);
     }
 
     // Draw warning
-    const warningY = urlY + 30;
+    const warningY = urlY + 50;
     ctx.fillStyle = '#ffcc00';
-    ctx.font = '14px Roboto';
+    ctx.font = '18px Roboto';
     ctx.fillText('Warning: This will override any existing game with the same name.', width / 2, warningY);
 
     // Draw buttons

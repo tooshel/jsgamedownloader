@@ -49,3 +49,18 @@
 
 # 2025-03-01 09:09:11.107589
 +I had to undo that, fyi. the problem was that I had a controller plugged in
+
+# 2025-03-04 17:56:48.851186
++yes
+
+# 2025-03-04 17:57:10.827776
++n
+
+# 2025-03-04 17:59:59.220733
++in src/main.js there is a draw function that lists out all of the games from a json file. the json file now has "tags" can you add that to the view?
+
+# 2025-03-04 18:00:02.862149
++yes
+
+# 2025-03-04 18:03:24.843116
++in line 380 you will see this    ctx.fillText(`Repository: ${item.url}`, width / 2, urlY); and that url is really long. I need to take off the hash and .zip at the end and add a line with the hash and show the more truncaked url. Can you do that?
