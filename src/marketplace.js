@@ -281,6 +281,21 @@ export class Marketplace {
       }
 
       ctx.fillText(description, textX, y + DESCRIPTION_OFFSET + 15);
+      
+      // Draw tags if available
+      if (item.tags && item.tags.length > 0) {
+        const tagY = y + DESCRIPTION_OFFSET + 35;
+        ctx.font = '12px Roboto';
+        ctx.fillStyle = isSelected ? '#f8d7da' : '#e94560';
+        
+        // Join tags with bullet points and truncate if too long
+        let tagsText = item.tags.join(' • ');
+        if (tagsText.length > 60) {
+          tagsText = tagsText.substring(0, 57) + '...';
+        }
+        
+        ctx.fillText(tagsText, textX, tagY);
+      }
     }
 
     // Draw scroll indicators if needed
